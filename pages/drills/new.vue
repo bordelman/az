@@ -1,0 +1,3 @@
+<template>
+  <DrillEditor />
+</template>
