@@ -10,12 +10,13 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "naive-ui": "^2.39.0",
+    "naive-ui": "^2.41.0",
     "nuxt": "^3.13.0",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
     "sass-embedded": "^1.78.0"
-  }
+  },
+  "packageManager": "yarn@4.6.0"
 }
