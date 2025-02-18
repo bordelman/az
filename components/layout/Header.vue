@@ -10,14 +10,14 @@
       <div class="top">
         <NuxtLink to="/soldiers">Přehled vojáků</NuxtLink>
         <NuxtLink
-          v-if="logged.position.id === 10"
+          v-if="logged.rank.id >= 7"
           to="/soldiers/new"
         >
           Založit vojáka
         </NuxtLink>
         <NuxtLink to="/drills">Přehled cvičení</NuxtLink>
         <NuxtLink
-          v-if="logged.position.id === 10"
+          v-if="logged.rank.id >= 7"
           to="/drills/new"
         >
           Založit cvičení

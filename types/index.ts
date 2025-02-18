@@ -2,7 +2,7 @@ export enum EAttendance {
 	NotResponded,
 	Present,
 	Absent
-}
+};
 
 export interface IDrill {
 	additionalInfo: string;
@@ -10,10 +10,12 @@ export interface IDrill {
 	dateTo: Date;
 	id: number;
 	name: string;
+	offerAccommodation: boolean;
 	returnDate: Date;
 }
 
 export interface INomination {
+	accommodation?: boolean;
 	drill: IDrill;
 	parking: IParking;
 	soldier: ISoldier;
@@ -41,7 +43,7 @@ export interface IParking {
 }
 
 export interface IRank {
-	id: number
+	id: number;
 	abbreviation: string;
 	rank: string;
 }

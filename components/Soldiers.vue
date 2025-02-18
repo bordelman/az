@@ -6,6 +6,7 @@
     <thead>
       <tr>
         <th
+          v-if="logged.rank.id > 7"
           :class="[direction, { active: sortBy === 'personalNumber' }]"
           @click="changeOrder('personalNumber')"
         >
@@ -60,18 +61,8 @@
         v-for="soldier of soldiers"
         :key="'soldier-' + soldier.personalNumber"
       >
-        <tr
-          v-if="
-            include
-              ? include.includes(soldier.personalNumber)
-              : exclude
-              ? !exclude.includes(soldier.personalNumber)
-              : true
-          "
-          @click="action(soldier.personalNumber)"
-          :data-personal-number="soldier.personalNumber"
-        >
-          <td>
+        <tr>
+          <td v-if="logged.rank.id > 7">
             <NuxtLink
               class="row"
               :to="
@@ -104,15 +95,14 @@ import { NTable } from "naive-ui";
 import { getSoldiers } from "@/utils/api";
 import type { ISoldier } from "~/types";
 
-const { exclude, include, clickAction, medicalExaminationDue } = defineProps({
-    exclude: Array,
-    include: Array,
+const { clickAction, medicalExaminationDue } = defineProps({
     clickAction: Function,
     medicalExaminationDue: {
       type: String,
-      default: "1970-01-01"
-    }
+      default: "1970-01-01",
+    },
   }),
+  logged = useState<ISoldier>("logged"),
   sortBy = ref("personalNumber"),
   direction = ref("asc"),
   soldiers: Ref<Array<ISoldier>> = ref([]);
@@ -132,15 +122,19 @@ function action(personalNumber: number) {
   }
 }
 
-watch([sortBy, direction], async([sortBy, direction]) => {
-  soldiers.value = await getSoldiers({
-    sortBy,
-    direction,
-    medicalExaminationDue
-  });
-}, {
-  immediate: true
-})
+watch(
+  [sortBy, direction],
+  async ([sortBy, direction]) => {
+    soldiers.value = await getSoldiers({
+      sortBy,
+      direction,
+      medicalExaminationDue,
+    });
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
 
 <style lang="scss" scoped>

@@ -10,20 +10,20 @@
   >
     <h1 class="drill-name">
       <NuxtLink
-        :class="{ 'drill-edit-link': logged.position.id === 10 }"
-        :to="logged.position.id === 10 ? `/drills/${drill.id}/edit` : undefined"
+        :class="{ 'drill-edit-link': logged.rank.id >= 7 }"
+        :to="logged.rank.id >= 7 ? `/drills/${drill.id}/edit` : undefined"
       >
         {{ drill.name }}
       </NuxtLink>
     </h1>
     <div>
-      {{ new Date(drill.dateFrom).toLocaleDateString() }} -
-      {{ new Date(drill.dateTo).toLocaleDateString() }} ({{
-        new Date(drill.returnDate).toLocaleDateString()
+      {{ new Date(drill.dateFrom).toLocaleDateString('cs') }} -
+      {{ new Date(drill.dateTo).toLocaleDateString('cs') }} ({{
+        new Date(drill.returnDate).toLocaleDateString('cs')
       }})
       <div
         class="controll-panel"
-        v-if="logged.position.id === 10"
+        v-if="logged.rank.id >= 7"
       >
         <NButton
           type="error"
@@ -74,27 +74,27 @@
             :key="'soldier-' + index"
           >
             <SoldierLink :soldier="nomination.soldier" />
-            <n-tooltip
+            <NTooltip
               v-if="nomination.parking"
               trigger="hover"
             >
               <template #trigger>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.5 4.002h2.962C10.045 4.002 11 5.104 11 6.586c0 1.494-.967 2.578-2.55 2.578H6.784V12H5.5zm2.77 4.072c.893 0 1.419-.545 1.419-1.488s-.526-1.482-1.42-1.482H6.778v2.97z"
-                  />
-                </svg>
+                <div class="badge">P</div>
               </template>
-              <div>{{ nomination.parking.brand }}</div>
-              <div>{{ nomination.parking.color }}</div>
-              <div>{{ nomination.parking.spz }}</div>
-            </n-tooltip>
+              <div>Parkování:</div>
+              <div>Značka vozu: {{ nomination.parking.brand }}</div>
+              <div>Barva: {{ nomination.parking.color }}</div>
+              <div>SPZ: {{ nomination.parking.spz }}</div>
+            </NTooltip>
+            <NTooltip
+              v-if="nomination.accommodation"
+              trigger="hover"
+            >
+              <template #trigger>
+                <div class="badge">U</div>
+              </template>
+              Zažádal o poskytnutí ubytování
+            </NTooltip>
           </li>
         </ul>
       </section>
@@ -160,6 +160,9 @@
           placeholder="SPZ"
         />
       </div>
+      <div v-if="drill.offerAccommodation" class="input-row">
+        <NCheckbox v-model:checked="accommodation">Chci ubytování </NCheckbox>
+      </div>
       <NButton @click="addMe">
         {{
           Object.values(parking).every((item) => item)
@@ -172,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NInput, NModal, NTooltip } from "naive-ui";
+import { NButton, NCheckbox, NInput, NModal, NTooltip } from "naive-ui";
 import { EAttendance, type IParking, type ISoldier } from "~/types";
 
 const { isLoading } = useLayout(),
@@ -210,7 +213,8 @@ const { isLoading } = useLayout(),
     present.value.some(
       (nomination) => nomination.soldier.personalNumber === myId
     )
-  );
+  ),
+  accommodation = ref(false);
 
 async function callRemoveDrill() {
   await removeDrill(drill.id);
@@ -223,11 +227,10 @@ async function addMe() {
     ? parking.value
     : undefined;
 
-  nominations.value = await reactToNomination(
-    id,
-    EAttendance.Present,
-    parkingNom
-  );
+  nominations.value = await reactToNomination(id, EAttendance.Present, {
+    parking: parkingNom,
+    accommodation: accommodation.value,
+  });
 
   showParkingModal.value = false;
   parking.value = { color: "", spz: "", brand: "" };
@@ -266,6 +269,22 @@ async function removeMe() {
 
     .attendents {
       color: green;
+
+      .soldier {
+        display: flex;
+
+        .badge {
+          cursor: pointer;
+          display: flex;
+          aspect-ratio: 1;
+          border-radius: 100%;
+          border: 1px solid currentColor;
+          height: 18px;
+          width: 18px;
+          justify-content: center;
+          align-items: center;
+        }
+      }
     }
 
     .skipped {

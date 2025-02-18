@@ -272,12 +272,14 @@ export async function removeDrill(id: number) {
   }
 }
 
-export async function reactToNomination(drillId: string, attendance: EAttendance, parking?: IParking) {
+export async function reactToNomination(drillId: string, attendance: EAttendance, data?: {accommodation?: boolean, parking?: IParking}) {
+  const {accommodation, parking} = data || {};
+
   loadingStart();
   try {
     return await (await fetch(`${apiBaseUrl}drills/${drillId}/nomination`, {
       method: "PATCH",
-      body: JSON.stringify({attendance, parking}),
+      body: JSON.stringify({attendance, parking, accommodation}),
       headers: {
         Authorization: getBearerToken(),
         "Content-Type": "application/json",

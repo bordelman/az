@@ -19,9 +19,9 @@
               {{ drill.name }}
             </NuxtLink>
           </td>
-          <td>{{ new Date(drill.dateFrom).toLocaleDateString() }}</td>
-          <td>{{ new Date(drill.dateTo).toLocaleDateString() }}</td>
-          <td>{{ new Date(drill.returnDate).toLocaleDateString() }}</td>
+          <td>{{ new Date(drill.dateFrom).toLocaleDateString('cs') }}</td>
+          <td>{{ new Date(drill.dateTo).toLocaleDateString('cs') }}</td>
+          <td>{{ new Date(drill.returnDate).toLocaleDateString('cs') }}</td>
           <td>
             {{
               Math.floor(

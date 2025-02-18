@@ -1,6 +1,6 @@
 <template>
   <section class="soldier">
-    <div>
+    <div v-if="logged.personalNumber === soldier.personalNumber">
       Osobní číslo:
       <span v-if="!edit">{{ soldier.personalNumber }}</span>
       <input
@@ -43,7 +43,7 @@
     <div>
       Pracovně lékařská prohlídka do:
       <span v-if="!edit">
-        {{ new Date(soldier.medicalExaminationDue).toLocaleDateString() }}
+        {{ new Date(soldier.medicalExaminationDue).toLocaleDateString('cs') }}
       </span>
       <input
         v-else
@@ -133,7 +133,7 @@
     >
       Změnit heslo
     </NButton>
-    <template v-if="logged?.position.id >= 9">
+    <template v-if="logged?.rank.id >= 7">
       <NButton
         v-if="!edit"
         @click="edit = true"
@@ -166,9 +166,9 @@
                 :to="'/drills/' + nomination.drill.id"
               >
                 {{ nomination.drill.name }} ({{
-                  new Date(nomination.drill.dateFrom).toLocaleDateString()
+                  new Date(nomination.drill.dateFrom).toLocaleDateString('cs')
                 }}
-                - {{ new Date(nomination.drill.dateTo).toLocaleDateString() }})
+                - {{ new Date(nomination.drill.dateTo).toLocaleDateString('cs') }})
                 <n-tooltip
                   v-if="nomination.parking"
                   trigger="hover"
@@ -210,9 +210,9 @@
                 :to="'/drills/' + nomination.drill.id"
               >
                 {{ nomination.drill.name }} ({{
-                  new Date(nomination.drill.dateFrom).toLocaleDateString()
+                  new Date(nomination.drill.dateFrom).toLocaleDateString('cs')
                 }}
-                - {{ new Date(nomination.drill.dateTo).toLocaleDateString() }})
+                - {{ new Date(nomination.drill.dateTo).toLocaleDateString('cs') }})
               </NuxtLink>
             </li>
           </ul>
@@ -233,9 +233,9 @@
                 :to="'/drills/' + nomination.drill.id"
               >
                 {{ nomination.drill.name }} ({{
-                  new Date(nomination.drill.dateFrom).toLocaleDateString()
+                  new Date(nomination.drill.dateFrom).toLocaleDateString('cs')
                 }}
-                - {{ new Date(nomination.drill.dateTo).toLocaleDateString() }})
+                - {{ new Date(nomination.drill.dateTo).toLocaleDateString('cs') }})
               </NuxtLink>
             </li>
           </ul>
