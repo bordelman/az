@@ -4,7 +4,6 @@
     :show="isLoading"
   >
     <NConfigProvider :locale="customizedLocale" :date-locale="dateCsCZ">
-      {{ dateCsCZ }}
       <n-modal-provider>
         <section class="layout">
           <LayoutHeader />
