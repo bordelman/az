@@ -3,56 +3,54 @@
     <NuxtLink to="/">
       <div class="logo" />
     </NuxtLink>
-    <div v-if="logged" class="logged-soldier">
-      {{ logged.rank.abbreviation }}. {{ logged.name }} {{ logged.lastname }}, {{ logged.position.position }} ({{
-        logged.company }}/{{ logged.platoon || "" }}/{{ logged.squad || "" }})
-    </div>
-    <div class="account">
-      <n-button class="log-in" v-if="!logged" @click="showModal = true">
-        Přihlásit se
-      </n-button>
-      <n-button class="log-out" v-else @click="logOut">Odhlásit</n-button>
-    </div>
-    <n-modal v-model:show="showModal" class="custom-card" preset="card" :style="bodyStyle" title="Přihlášení"
-      :bordered="false" size="huge">
-      <form class="login-form">
-        <div class="row">
-          <n-input v-model:value="login" placeholder="Login (e-mail nebo osobní číslo)" />
+    <div
+      class="center"
+      v-if="logged"
+    >
+      <div class="top">
+        <NuxtLink to="/soldiers">Přehled vojáků</NuxtLink>
+        <NuxtLink
+          v-if="logged.rank.id >= 7"
+          to="/soldiers/new"
+        >
+          Založit vojáka
+        </NuxtLink>
+        <NuxtLink to="/drills">Přehled cvičení</NuxtLink>
+        <NuxtLink
+          v-if="logged.rank.id >= 7"
+          to="/drills/new"
+        >
+          Založit cvičení
+        </NuxtLink>
+      </div>
+      <div class="bottom">
+        <div class="logged-soldier">
+          {{ logged.rank.abbreviation }}. {{ logged.name }}
+          {{ logged.lastname }}, {{ logged.position.position }} ({{
+            logged.company
+          }}/{{ logged.platoon || "_" }}/{{ logged.squad || "_" }})
         </div>
-        <div class="row">
-          <n-input v-model:value="password" type="password" show-password-on="mousedown" placeholder="Heslo" />
-        </div>
-      </form>
-      <template #footer>
-        <n-button :disabled="!password || !login" @click="logIn(login, password)">
-          Přihlásit
-        </n-button>
-      </template>
-    </n-modal>
+      </div>
+    </div>
+
+    <NButton
+      class="log-out"
+      v-if="logged"
+      @click="logOut"
+    >
+      Odhlásit
+    </NButton>
   </section>
 </template>
 
 <script setup>
-import {NButton, NInput, NModal} from "naive-ui";
-import {logIn} from "../../utils/api";
-const logged = useState("logged"),
-  bodyStyle = {
-    width: "600px",
-  },
-  login = ref(),
-  password = ref(),
-  showModal = ref(false);
-
-watch(logged, () => {
-  if (logged) {
-    showModal.value = false;
-  }
-});
+import { NButton } from "naive-ui";
+const logged = useState("logged");
 
 function logOut() {
-  document.cookie =
-    "army_access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+  document.cookie = `army_access_token=;path=/`;
   logged.value = null;
+  useRouter().replace("/");
 }
 </script>
 
@@ -70,6 +68,17 @@ function logOut() {
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
+  }
+
+  .center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .top {
+      display: flex;
+      gap: 16px;
+    }
   }
 
   .log-in,

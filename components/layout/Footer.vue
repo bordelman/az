@@ -1,9 +1,9 @@
 <template>
   <section class="footer">
     <NuxtLink to="/soldiers">Přehled vojáků</NuxtLink>
-    <NuxtLink v-if="logged.position.id === 10" to="/soldiers/new">Založit vojáka</NuxtLink>
+    <NuxtLink v-if="logged.rank.id >= 7" to="/soldiers/new">Založit vojáka</NuxtLink>
     <NuxtLink to="/drills">Přehled cvičení</NuxtLink>
-    <NuxtLink v-if="logged.position.id === 10" to="/drills/new">Založit cvičení</NuxtLink>
+    <NuxtLink v-if="logged.rank.id >= 7" to="/drills/new">Založit cvičení</NuxtLink>
   </section>
 </template>
 

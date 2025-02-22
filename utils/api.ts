@@ -1,10 +1,13 @@
 import type {INomination, ISoldier, EAttendance, IParking} from "~/types";
 
-const apiBaseUrl = 'http://localhost:8000/api/';
+const apiBaseUrl = 'http://localhost:8000/api/',
+  {loadingEnd, loadingStart} = useLayout();
 
 // AUTH
 
 export async function logIn(login: string, password: string) {
+  loadingStart();
+
   try {
     const response = await fetch(`${apiBaseUrl}auth/login`, {
       method: "POST",
@@ -23,10 +26,14 @@ export async function logIn(login: string, password: string) {
     }
   } catch (error) {
     window.alert(error.message);
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function autoLogIn() {
+  loadingStart();
+
   try {
     const response = await fetch(`${apiBaseUrl}auth/auto-login`, {
       headers: {
@@ -41,11 +48,41 @@ export async function autoLogIn() {
     }
   } catch (error) {
     window.alert(error.message);
+  } finally {
+    loadingEnd();
+  }
+}
+
+export async function changePassword(oldPassword: string, newPassword: string, controllPassword: string) {
+  loadingStart();
+
+  try {
+    const response = await fetch(`${apiBaseUrl}auth/change-password`, {
+      method: "POST",
+      headers: {
+        Authorization: getBearerToken(),
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify({oldPassword, newPassword, controllPassword})
+    });
+    if (response.status === 200) {
+      const result = await response.json();
+      console.log(result);
+    }
+    else {
+      throw new Error((await response.json()).message);
+    }
+  } catch (error) {
+    window.alert(error.message);
+  } finally {
+    loadingEnd();
   }
 }
 
 // SOLDIERS
 export async function createSoldier(soldier: Record<any, any>) {
+  loadingStart();
+
   try {
     return await (await fetch(`${apiBaseUrl}soldiers`, {
       method: "POST",
@@ -57,10 +94,14 @@ export async function createSoldier(soldier: Record<any, any>) {
     })).json();
   } catch (error) {
     console.log(error);
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function getSoldiers(params: Record<string, string>): Promise<Array<ISoldier>> {
+  loadingStart();
+
   const query = new URLSearchParams(params);
   try {
     return await (await fetch(`${apiBaseUrl}soldiers/search?${query}`, {
@@ -71,10 +112,14 @@ export async function getSoldiers(params: Record<string, string>): Promise<Array
   } catch (error) {
     console.log(error);
     return [];
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function editSoldier(soldier: Record<any, any>) {
+  loadingStart();
+
   const {personalNumber} = soldier;
   try {
     return await (await fetch(`${apiBaseUrl}soldiers/${personalNumber}`, {
@@ -87,10 +132,13 @@ export async function editSoldier(soldier: Record<any, any>) {
     })).json();
   } catch (error) {
     console.log(error);
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function getNominations(personalNumber: string): Promise<Array<INomination>> {
+  loadingStart();
   try {
     return await (await fetch(`${apiBaseUrl}soldiers/${personalNumber}/nominations`, {
       headers: {
@@ -101,11 +149,14 @@ export async function getNominations(personalNumber: string): Promise<Array<INom
     window.alert(error);
     console.log(error);
     return [];
+  } finally {
+    loadingEnd();
   }
 }
 
 // DRILLS
 export async function createDrill(drill: Record<any, any>, nominated: Array<number>): Promise<boolean> {
+  loadingStart();
   try {
     const response = await fetch(apiBaseUrl + "drills", {
       method: "POST",
@@ -124,11 +175,14 @@ export async function createDrill(drill: Record<any, any>, nominated: Array<numb
     return id;
   } catch (error) {
     window.alert(error);
-    return false
+    return false;
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function getDrills(params?: Record<string, any>) {
+  loadingStart();
   const query = new URLSearchParams(params);
   try {
     return await (await fetch(`${apiBaseUrl}drills/search?${query}`, {
@@ -138,10 +192,13 @@ export async function getDrills(params?: Record<string, any>) {
     })).json();
   } catch (error) {
     console.log(error);
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function getDrillNominations(drillId: string, status?: number): Promise<Array<INomination>> {
+  loadingStart();
   try {
     return await (await fetch(`${apiBaseUrl}drills/${drillId}/nominations${status !== undefined ? ('?status=' + status) : ''}`, {
       headers: {
@@ -151,10 +208,13 @@ export async function getDrillNominations(drillId: string, status?: number): Pro
   } catch (error) {
     console.log(error);
     return [];
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function updateDrillNominations(id: number, nominated: Array<number>) {
+  loadingStart();
   try {
     await fetch(`${apiBaseUrl}drills/${id}/nominations`, {
       method: "PUT",
@@ -166,10 +226,13 @@ export async function updateDrillNominations(id: number, nominated: Array<number
     });
   } catch (error) {
     window.alert(error);
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function updateDrill(drill: Record<any, any>, nominated: Array<number>): Promise<boolean> {
+  loadingStart();
   try {
     const id = drill.id;
     delete drill.id;
@@ -188,10 +251,13 @@ export async function updateDrill(drill: Record<any, any>, nominated: Array<numb
   } catch (error) {
     window.alert(error);
     return false;
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function removeDrill(id: number) {
+  loadingStart();
   try {
     await (await fetch(`${apiBaseUrl}drills/${id}`, {
       method: "DELETE",
@@ -201,14 +267,19 @@ export async function removeDrill(id: number) {
     })).json();
   } catch (error) {
     console.log(error);
+  } finally {
+    loadingEnd();
   }
 }
 
-export async function reactToNomination(drillId: string, attendance: EAttendance, parking?: IParking) {
+export async function reactToNomination(drillId: string, attendance: EAttendance, data?: {accommodation?: boolean, parking?: IParking}) {
+  const {accommodation, parking} = data || {};
+
+  loadingStart();
   try {
     return await (await fetch(`${apiBaseUrl}drills/${drillId}/nomination`, {
       method: "PATCH",
-      body: JSON.stringify({attendance, parking}),
+      body: JSON.stringify({attendance, parking, accommodation}),
       headers: {
         Authorization: getBearerToken(),
         "Content-Type": "application/json",
@@ -217,11 +288,14 @@ export async function reactToNomination(drillId: string, attendance: EAttendance
     )).json();
   } catch (error) {
     console.log(error);
+  } finally {
+    loadingEnd();
   }
 }
 
 // ENUMS
 export async function getRanks() {
+  loadingStart();
   try {
     return await (await fetch(`${apiBaseUrl}enums/ranks`, {
       headers: {
@@ -230,10 +304,13 @@ export async function getRanks() {
     })).json();
   } catch (error) {
     console.log(error);
+  } finally {
+    loadingEnd();
   }
 }
 
 export async function getPositions() {
+  loadingStart();
   try {
     return await (await fetch(`${apiBaseUrl}enums/positions`, {
       headers: {
@@ -242,6 +319,8 @@ export async function getPositions() {
     })).json();
   } catch (error) {
     console.log(error);
+  } finally {
+    loadingEnd();
   }
 }
 

@@ -1,8 +1,12 @@
 <template>
-  <n-table :single-line="false" striped>
+  <n-table
+    :single-line="false"
+    striped
+  >
     <thead>
       <tr>
         <th
+          v-if="logged.rank.id > 7"
           :class="[direction, { active: sortBy === 'personalNumber' }]"
           @click="changeOrder('personalNumber')"
         >
@@ -44,6 +48,13 @@
         >
           Družstvo
         </th>
+        <th
+          v-if="logged.rank.id > 7"
+          :class="[direction, { active: sortBy === 'medicalExaminationDue' }]"
+          @click="changeOrder('medicalExaminationDue')"
+        >
+          Lékařská prohlídka
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -51,19 +62,14 @@
         v-for="soldier of soldiers"
         :key="'soldier-' + soldier.personalNumber"
       >
-        <tr
-          v-if="
-            include
-              ? include.includes(soldier.personalNumber)
-              : exclude
-              ? !exclude.includes(soldier.personalNumber)
-              : true
-          "
-          @click="action(soldier.personalNumber)"
-          :data-personal-number="soldier.personalNumber"
-        >
-          <td>
-            <NuxtLink class="row" :to="!clickAction ? ('/soldiers/' + soldier.personalNumber) : undefined">
+        <tr>
+          <td v-if="logged.rank.id > 7">
+            <NuxtLink
+              class="row"
+              :to="
+                !clickAction ? '/soldiers/' + soldier.personalNumber : undefined
+              "
+            >
               {{ soldier.personalNumber }}
             </NuxtLink>
           </td>
@@ -73,6 +79,11 @@
           <td>{{ soldier.position.position }}</td>
           <td>{{ soldier.platoon }}</td>
           <td>{{ soldier.squad }}</td>
+          <td v-if="logged.rank.id > 7">
+            {{
+              new Date(soldier.medicalExaminationDue).toLocaleDateString("cs")
+            }}
+          </td>
         </tr>
       </template>
     </tbody>
@@ -84,11 +95,15 @@
 import { NTable } from "naive-ui";
 import { getSoldiers } from "@/utils/api";
 import type { ISoldier } from "~/types";
-const { exclude, include, clickAction } = defineProps({
-    exclude: Array,
-    include: Array,
+
+const { clickAction, medicalExaminationDue } = defineProps({
     clickAction: Function,
+    medicalExaminationDue: {
+      type: String,
+      default: "1970-01-01",
+    },
   }),
+  logged = useState<ISoldier>("logged"),
   sortBy = ref("personalNumber"),
   direction = ref("asc"),
   soldiers: Ref<Array<ISoldier>> = ref([]);
@@ -108,12 +123,19 @@ function action(personalNumber: number) {
   }
 }
 
-watchEffect(async () => {
-  soldiers.value = await getSoldiers({
-    sortBy: sortBy.value,
-    direction: direction.value,
-  });
-});
+watch(
+  [sortBy, direction],
+  async ([sortBy, direction]) => {
+    soldiers.value = await getSoldiers({
+      sortBy,
+      direction,
+      medicalExaminationDue,
+    });
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
 
 <style lang="scss" scoped>

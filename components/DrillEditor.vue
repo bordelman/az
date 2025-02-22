@@ -3,40 +3,63 @@
     <div class="form">
       <div class="input-row">
         <label for="name">Název cvičení</label>
-        <input id="name" type="text" v-model="drill.name" />
-      </div>
-      <div class="input-row">
-        <label for="dateFrom">Od</label>
-        <input
-          id="dateFrom"
-          type="date"
-          v-model="drill.dateFrom"
+        <NInput
+          id="name"
+          type="text"
+          placeholder=""
+          v-model:value="drillSrc.name"
         />
       </div>
       <div class="input-row">
-        <label for="dateTo">Do</label>
-        <input
-          id="dateTo"
-          type="date"
-          v-model="drill.dateTo"
+        <label for="date">Datum cvičení</label>
+        <NDatePicker
+          v-model:value="dateRange"
+          type="daterange"
+          :update-value-on-close="true"
+          @update:value="updateDateRange"
         />
       </div>
       <div class="input-row">
         <label for="returnDate">Datum návratu</label>
-        <input
+        <NDatePicker
           id="returnDate"
-          type="date"
-          v-model="drill.returnDate"
+          v-model:value="returnDate"
+          placeholder=""
+          :is-date-disabled="isDateDisabled"
+          @update:value="updateReturnDate"
         />
       </div>
       <div class="input-row">
-        <label for="additionlaInfo">Dodatečné info</label>
-        <input id="additionlaInfo" type="text" v-model="drill.additionalInfo" />
+        <!-- <label for="additionlaInfo">Dodatečné info</label>
+        <NInput
+          id="additionlaInfo"
+          type="text"
+          placeholder=""
+          v-model:value="drillSrc.additionalInfo"
+        /> -->
+      </div>
+      <div class="input-row">
+        <label for="additionlaInfo">Nabídnout ubytování</label>
+        <NCheckbox
+          id="offerAccommodation"
+          :checked-value="1"
+          :unchecked-value="0"
+          v-model:checked="drillSrc.offerAccommodation"
+        />
       </div>
     </div>
-    <NButton @click="showSoldierSelector = true"> Přidat vojáky </NButton>
-    <NButton @click="callCreateDrill">Uloži</NButton>
-    <n-modal
+    <NButton
+      :disabled="!drillSrc.dateFrom || !drillSrc.dateTo"
+      @click="showSoldierSelector = true"
+    >
+      Přidat vojáky
+    </NButton>
+    <NButton
+      :disabled="!drillSrc.dateFrom || !drillSrc.dateTo"
+      @click="callCreateDrill"
+      >Uloži</NButton
+    >
+    <NModal
       v-model:show="showSoldierSelector"
       class="custom-card"
       preset="card"
@@ -45,59 +68,281 @@
       :bordered="false"
       size="huge"
     >
-      <div class="group">
-        <div class="group-heading">Nenominovaní</div>
-        <Soldiers :exclude="nominated" :click-action="nominateSoldier" />
-      </div>
-      <div class="group">
-        <div class="group-heading">Nominovaní</div>
-        <Soldiers :include="nominated" :click-action="denominateSoldier" />
-      </div>
-    </n-modal>
+      <NDataTable
+        striped
+        :columns="columns"
+        :data="soldiers"
+        :row-key="(row: RowData) => row.personalNumber"
+        :default-checked-row-keys="nominated"
+        max-height="60vh"
+        @update:checked-row-keys="handleCheck"
+      />
+    </NModal>
   </section>
 </template>
 
 <script setup lang="ts">
-import { NButton, NModal } from "naive-ui";
+import {
+  NButton,
+  NDatePicker,
+  NModal,
+  NInput,
+  NCheckbox,
+  NDataTable,
+  type DataTableRowKey,
+} from "naive-ui";
+import type { RowData } from "naive-ui/es/data-table/src/interface";
 import type { PropType } from "vue";
-import type { IDrill } from "~/types";
+import type { IDrill, ISoldier } from "~/types";
 
 const { drill, nominated } = defineProps({
-    drill: {
-      type: Object as PropType<IDrill>,
-      default: {
-        name: null,
-        dateFrom: null,
-        dateTo: null,
-        returnDate: null,
-        additionalInfo: null,
-      },
-    },
+    drill: Object as PropType<IDrill>,
     nominated: {
       type: Array<number>,
       default: [],
     },
   }),
-  showSoldierSelector = ref(false);
-
-function nominateSoldier(id: number) {
-  nominated.push(id);
-}
-
-function denominateSoldier(id: number) {
-  nominated.splice(
-    nominated.findIndex((nominatedId) => nominatedId === id),
-    1
+  drillSrc = ref(
+    drill || {
+      name: null,
+      dateFrom: null,
+      dateTo: null,
+      returnDate: null,
+      additionalInfo: null,
+      offerAccommodation: false,
+    }
+  ),
+  nominatedSoldiers = ref(nominated),
+  showSoldierSelector = ref(false),
+  dateRange = ref<[number, number]>([
+    new Date(drillSrc.value.dateFrom || Date.now()).getTime(),
+    new Date(drillSrc.value.dateTo || Date.now()).getTime(),
+  ]),
+  returnDate = ref(
+    drillSrc.value.returnDate
+      ? new Date(drillSrc.value.dateTo).getTime()
+      : undefined
+  ),
+  columns = computed(() => {
+    const squadFiltrOptions = soldiers.value
+        .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
+          if (!acc.some((soldier) => soldier.squad === currentValue.squad))
+            acc.push(currentValue);
+          return acc;
+        }, [])
+        .map((item) => {
+          return {
+            label: item.squad,
+            value: item.squad,
+          };
+        })
+        .sort((item1, item2) => item1.value - item2.value),
+      platoonFiltrOptions = soldiers.value
+        .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
+          if (!acc.some((soldier) => soldier.platoon === currentValue.platoon))
+            acc.push(currentValue);
+          return acc;
+        }, [])
+        .map((item) => {
+          return {
+            label: item.platoon,
+            value: item.platoon,
+          };
+        })
+        .sort((item1, item2) => item1.value - item2.value),
+      positionFiltrOptions = soldiers.value
+        .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
+          if (
+            !acc.some(
+              (soldier) => soldier.position.id === currentValue.position.id
+            )
+          )
+            acc.push(currentValue);
+          return acc;
+        }, [])
+        .map((item) => {
+          return {
+            label: item.position.position,
+            value: item.position.id,
+          };
+        })
+        .sort((item1, item2) => item1.value - item2.value),
+      rankFiltrOptions = soldiers.value
+        .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
+          if (!acc.some((soldier) => soldier.rank.id === currentValue.rank.id))
+            acc.push(currentValue);
+          return acc;
+        }, [])
+        .map((item) => {
+          return {
+            label: item.rank.rank,
+            value: item.rank.id,
+          };
+        })
+        .sort((item1, item2) => item1.value - item2.value);
+    return [
+      {
+        type: "selection",
+      },
+      {
+        title: "Osobní číslo",
+        key: "personalNumber",
+        sorter: (soldier1: ISoldier, soldier2: ISoldier) =>
+          soldier1.personalNumber - soldier2.personalNumber,
+        defaultSortOrder: "ascend",
+      },
+      {
+        title: "Hodnost",
+        key: "rank",
+        render(soldier: ISoldier) {
+          return h("span", soldier.rank.abbreviation + ".");
+        },
+        sorter: (soldier1: ISoldier, soldier2: ISoldier) =>
+          soldier1.rank.id - soldier2.rank.id,
+        filterOptions: rankFiltrOptions,
+        filter(rank: number, soldier: ISoldier) {
+          return soldier.rank.id === rank;
+        },
+      },
+      {
+        title: "Jméno",
+        key: "firstname",
+        sorter: {
+          compare: (soldier1: ISoldier, soldier2: ISoldier) =>
+            soldier1.firstname.localeCompare(soldier2.firstname),
+          multiple: 5,
+        },
+      },
+      {
+        title: "Příjmení",
+        key: "lastname",
+        sorter: {
+          compare: (soldier1: ISoldier, soldier2: ISoldier) =>
+            soldier1.lastname.localeCompare(soldier2.lastname),
+          multiple: 6,
+        },
+      },
+      {
+        title: "Pozice",
+        key: "position",
+        render(soldier: ISoldier) {
+          return h("span", soldier.position.position);
+        },
+        sorter: (soldier1: ISoldier, soldier2: ISoldier) =>
+          soldier1.position.position.localeCompare(soldier2.position.position),
+        filterOptions: positionFiltrOptions,
+        filter(position: number, soldier: ISoldier) {
+          return soldier.position.id === position;
+        },
+      },
+      {
+        title: "Četa",
+        key: "platoon",
+        sorter: {
+          compare: (soldier1: ISoldier, soldier2: ISoldier) =>
+            (soldier1.platoon || 0) - (soldier2.platoon || 0),
+          multiple: 2,
+        },
+        filterOptions: platoonFiltrOptions,
+        filter(platoon: number, soldier: ISoldier) {
+          return soldier.platoon === platoon;
+        },
+      },
+      {
+        title: "Družstvo",
+        key: "squad",
+        sorter: {
+          compare: (soldier1: ISoldier, soldier2: ISoldier) =>
+            (soldier1.squad || 0) - (soldier2.squad || 0),
+          multiple: 1,
+        },
+        filterOptions: squadFiltrOptions,
+        filter(squad: number, soldier: ISoldier) {
+          return soldier.squad === squad;
+        },
+      },
+      {
+        title: "Lékařská prohlídka",
+        key: "medicalExaminationDue",
+        filterOptions: [
+          {
+            label: "K dnešnímu datu",
+            value: Date.now(),
+          },
+          {
+            label:
+              "K datu začátku cvičení " +
+              new Date(drillSrc.value.dateFrom).toLocaleDateString("cs"),
+            value: new Date(drillSrc.value.dateFrom || Date.now()).getTime(),
+          },
+          {
+            label:
+              "K datu konce cvičení " +
+              new Date(drillSrc.value.dateTo).toLocaleDateString("cs"),
+            value: new Date(drillSrc.value.dateTo || Date.now()).getTime(),
+          },
+        ],
+        filter(value: number, soldier: ISoldier) {
+          return new Date(soldier.medicalExaminationDue).getTime() >= value;
+        },
+        render(soldier: ISoldier) {
+          return h(
+            "span",
+            new Date(soldier.medicalExaminationDue).toLocaleDateString("cs")
+          );
+        },
+      },
+    ];
+  }),
+  soldiers = ref(
+    await getSoldiers({
+      sortBy: "personalNumber",
+      direction: "asc",
+    })
   );
+
+function handleCheck(rowKeys: DataTableRowKey[]) {
+  nominatedSoldiers.value = rowKeys;
 }
+
+function updateDateRange() {
+  const [from, to] = dateRange.value.map((date) => {
+    const dateSource = new Date(date),
+      year = dateSource.getFullYear(),
+      month = dateSource.getMonth() + 1,
+      day = dateSource.getDate();
+    return `${year}-${(month < 10 ? "0" : "") + month}-${
+      (day < 10 ? "0" : "") + day
+    }`;
+  });
+
+  drillSrc.value.dateFrom = from;
+  drillSrc.value.dateTo = to;
+}
+
+function isDateDisabled(ts: number) {
+  return ts < dateRange.value[0] || ts > dateRange.value[1];
+}
+
+function updateReturnDate() {
+  const dateSource = new Date(returnDate.value),
+    year = dateSource.getFullYear(),
+    month = dateSource.getMonth() + 1,
+    day = dateSource.getDate();
+
+  drillSrc.value.returnDate = `${year}-${(month < 10 ? "0" : "") + month}-${
+    (day < 10 ? "0" : "") + day
+  }`;
+}
+
 async function callCreateDrill() {
-  console.log({nominated});
-  
+  console.log(nominatedSoldiers.value);
+
   try {
-    if (drill.id) {
-      await updateDrill(drill, nominated);
+    if (drillSrc.value.id) {
+      await updateDrill(drillSrc.value, nominatedSoldiers.value);
     } else {
-      await createDrill(drill, nominated);
+      await createDrill(drillSrc.value, nominatedSoldiers.value);
     }
     useRouter;
   } catch (error) {
