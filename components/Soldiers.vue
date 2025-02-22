@@ -4,13 +4,15 @@
     :columns="columns"
     :data="soldiers"
     :row-key="(row: RowData) => row.personalNumber"
+    :row-props="rowProps"
   />
 </template>
 
 <script setup lang="ts">
-import { NDataTable, NTable } from "naive-ui";
+import { NDataTable } from "naive-ui";
 import { getSoldiers } from "@/utils/api";
 import type { ISoldier } from "~/types";
+import type { RowData } from "naive-ui/es/data-table/src/interface";
 
 const { medicalExaminationDue } = defineProps({
     medicalExaminationDue: {
@@ -19,9 +21,11 @@ const { medicalExaminationDue } = defineProps({
     },
   }),
   logged = useState<ISoldier>("logged"),
-  sortBy = ref("personalNumber"),
-  direction = ref("asc"),
-  soldiers: Ref<Array<ISoldier>> = ref([]),
+  soldiers: Ref<Array<ISoldier>> = ref(
+    await getSoldiers({
+      medicalExaminationDue,
+    })
+  ),
   columns = computed(() => {
     const squadFiltrOptions = soldiers.value
         .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
@@ -191,6 +195,9 @@ const { medicalExaminationDue } = defineProps({
         {
           title: "Lékařská prohlídka",
           key: "medicalExaminationDue",
+          sorter: (soldier1: ISoldier, soldier2: ISoldier) =>
+            new Date(soldier1.medicalExaminationDue).getTime() -
+            new Date(soldier2.medicalExaminationDue).getTime(),
           filterOptions: [
             {
               label: "K dnešnímu datu",
@@ -215,30 +222,17 @@ const { medicalExaminationDue } = defineProps({
     }
 
     return columns;
-  });
-
-function changeOrder(param) {
-  if (param === sortBy.value) {
-    direction.value = direction.value === "asc" ? "desc" : "asc";
-  } else {
-    sortBy.value = param;
-    direction.value = "asc";
-  }
-}
-
-watch(
-  [sortBy, direction],
-  async ([sortBy, direction]) => {
-    soldiers.value = await getSoldiers({
-      sortBy,
-      direction,
-      medicalExaminationDue,
-    });
-  },
-  {
-    immediate: true,
-  }
-);
+  }),
+  rowProps = (row: ISoldier) => {
+    if (logged.value.rank.id > 7) {
+      return {
+        style: "cursor: pointer;",
+        onClick: () => {
+          useRouter().push("/soldiers/" + row.personalNumber);
+        },
+      };
+    }
+  };
 </script>
 
 <style lang="scss" scoped>
