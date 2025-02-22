@@ -1,6 +1,6 @@
 import type {INomination, ISoldier, EAttendance, IParking} from "~/types";
 
-const apiBaseUrl = 'http://pecaj.fun/az/api/',
+const apiBaseUrl = 'https://pecaj.fun/az/api/',
   {loadingEnd, loadingStart} = useLayout();
 
 // AUTH
