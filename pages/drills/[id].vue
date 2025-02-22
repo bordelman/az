@@ -109,7 +109,7 @@
                   />
                 </svg>
               </template>
-              Upravit parkování/ubytování
+              Upravit parkování{{ drill.offerAccommodation ? '/ubytování' : ''}}
             </NTooltip>
           </li>
         </ul>
