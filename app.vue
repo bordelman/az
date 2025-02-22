@@ -86,11 +86,6 @@ useHead({
 
 onMounted(async () => {
   await autoLogIn();
-
-  if (!logged.value) {
-    useRouter().replace("/");
-  }
-
   loadingEnd();
   loaded.value = true;
 });

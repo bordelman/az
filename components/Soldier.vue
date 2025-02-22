@@ -148,7 +148,7 @@
       </NButton>
     </template>
     <section class="drills">
-      <h2>Nominace</h2>
+      <h2>Moje nominace</h2>
       <section class="lists">
         <section class="attend">
           <h2>
