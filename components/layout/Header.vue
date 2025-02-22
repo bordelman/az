@@ -64,7 +64,7 @@ function logOut() {
   .logo {
     height: 50px;
     width: 50px;
-    background-image: url("/IMG_1332.PNG");
+    background-image: url("/logo.png");
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
