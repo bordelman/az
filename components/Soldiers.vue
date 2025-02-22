@@ -37,6 +37,12 @@
           Pozice
         </th>
         <th
+          :class="[direction, { active: sortBy === 'company' }]"
+          @click="changeOrder('company')"
+        >
+          Rota
+        </th>
+        <th
           :class="[direction, { active: sortBy === 'platoon' }]"
           @click="changeOrder('platoon')"
         >
@@ -59,8 +65,8 @@
     </thead>
     <tbody>
       <template
-        v-for="soldier of soldiers"
-        :key="'soldier-' + soldier.personalNumber"
+        v-for="(soldier, index) of soldiers"
+        :key="'soldier-' + index"
       >
         <tr>
           <td v-if="logged.rank.id > 7">
@@ -77,6 +83,7 @@
           <td>{{ soldier.firstname }}</td>
           <td>{{ soldier.lastname }}</td>
           <td>{{ soldier.position.position }}</td>
+          <td>{{ soldier.company }}</td>
           <td>{{ soldier.platoon }}</td>
           <td>{{ soldier.squad }}</td>
           <td v-if="logged.rank.id > 7">
