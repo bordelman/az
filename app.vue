@@ -98,7 +98,7 @@ onMounted(async () => {
 
 body {
   margin: 0 auto;
-  max-width: 1024px;
+  max-width: 1490px;
   width: 100vw;
 }
 
