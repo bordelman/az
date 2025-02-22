@@ -11,15 +11,15 @@
     <h1 class="drill-name">
       <NuxtLink
         :class="{ 'drill-edit-link': logged.rank.id >= 7 }"
-        :to="logged.rank.id >= 7 ? `/drills/${drill.id}/edit` : undefined"
+        :to="logged.rank.id >= 7 ? `/drills/${id}/edit` : undefined"
       >
         {{ drill.name }}
       </NuxtLink>
     </h1>
     <div>
-      {{ new Date(drill.dateFrom).toLocaleDateString('cs') }} -
-      {{ new Date(drill.dateTo).toLocaleDateString('cs') }} ({{
-        new Date(drill.returnDate).toLocaleDateString('cs')
+      {{ new Date(drill.dateFrom).toLocaleDateString("cs") }} -
+      {{ new Date(drill.dateTo).toLocaleDateString("cs") }} ({{
+        new Date(drill.returnDate).toLocaleDateString("cs")
       }})
       <div
         class="controll-panel"
@@ -160,7 +160,10 @@
           placeholder="SPZ"
         />
       </div>
-      <div v-if="drill.offerAccommodation" class="input-row">
+      <div
+        v-if="drill.offerAccommodation"
+        class="input-row"
+      >
         <NCheckbox v-model:checked="accommodation">Chci ubytování </NCheckbox>
       </div>
       <NButton @click="addMe">
@@ -184,7 +187,7 @@ const { isLoading } = useLayout(),
   { id } = useRoute().params as unknown as { id: string },
   showParkingModal = ref(false),
   parking: Ref<IParking> = ref({ color: "", spz: "", brand: "" }),
-  drill = (await getDrills({ id }))[0],
+  drill = ref((await getDrills({ id }))[0]),
   nominations = ref(await getDrillNominations(id)),
   present = computed(() =>
     nominations.value.filter(
@@ -201,7 +204,7 @@ const { isLoading } = useLayout(),
       (nomination) => nomination.status === EAttendance.NotResponded
     )
   ),
-  nominated = ref(
+  nominated = computed(() =>
     nominations.value.map((nomination) => nomination.soldier.personalNumber)
   ),
   alreadyAbsent = computed(() =>
@@ -216,8 +219,22 @@ const { isLoading } = useLayout(),
   ),
   accommodation = ref(false);
 
+watch(
+  () => drill.value.id,
+  async (newId) => {
+    if (newId) {
+      const [drillsArrSrc, nominationsSrc] = await Promise.all([
+        getDrills({ id }),
+        getDrillNominations(id),
+      ]);
+      drill.value = drillsArrSrc[0];
+      nominations.value = nominationsSrc;
+    }
+  }
+);
+
 async function callRemoveDrill() {
-  await removeDrill(drill.id);
+  await removeDrill(drill.value.id);
 
   useRouter().replace("/drills");
 }

@@ -30,13 +30,13 @@
         />
       </div>
       <div class="input-row">
-        <!-- <label for="additionlaInfo">Dodatečné info</label>
+        <label for="additionlaInfo">Dodatečné info</label>
         <NInput
           id="additionlaInfo"
           type="text"
           placeholder=""
           v-model:value="drillSrc.additionalInfo"
-        /> -->
+        />
       </div>
       <div class="input-row">
         <label for="additionlaInfo">Nabídnout ubytování</label>
@@ -52,18 +52,18 @@
       :disabled="!drillSrc.dateFrom || !drillSrc.dateTo"
       @click="showSoldierSelector = true"
     >
-      Přidat vojáky
+      Vybrat vojáky{{ nominatedSoldiers.length ? ` (${nominatedSoldiers.length})` : ''}}
     </NButton>
     <NButton
       :disabled="!drillSrc.dateFrom || !drillSrc.dateTo"
       @click="callCreateDrill"
-      >Uloži</NButton
+      >Uložit</NButton
     >
     <NModal
       v-model:show="showSoldierSelector"
       class="custom-card"
       preset="card"
-      :style="{ maxWidth: '80vw' }"
+      :style="{ maxWidth: '80vw', maxHeight: '80vh' }"
       title="Nominace"
       :bordered="false"
       size="huge"
@@ -73,10 +73,18 @@
         :columns="columns"
         :data="soldiers"
         :row-key="(row: RowData) => row.personalNumber"
-        :default-checked-row-keys="nominated"
-        max-height="60vh"
+        :default-checked-row-keys="nominatedSoldiers"
+        max-height="50vh"
         @update:checked-row-keys="handleCheck"
       />
+      <template #action>
+        <NButton @click="callCreateDrill">Potvrdit výběr</NButton>
+        <NButton
+          type="error"
+          @click="revertNominations"
+          >Zahodit změny</NButton
+        >
+      </template>
     </NModal>
   </section>
 </template>
@@ -104,6 +112,7 @@ const { drill, nominated } = defineProps({
   }),
   drillSrc = ref(
     drill || {
+      id: null as unknown as number,
       name: null,
       dateFrom: null,
       dateTo: null,
@@ -305,6 +314,11 @@ function handleCheck(rowKeys: DataTableRowKey[]) {
   nominatedSoldiers.value = rowKeys;
 }
 
+function revertNominations() {
+  nominatedSoldiers.value = nominated;
+  showSoldierSelector.value = false;
+}
+
 function updateDateRange() {
   const [from, to] = dateRange.value.map((date) => {
     const dateSource = new Date(date),
@@ -336,15 +350,17 @@ function updateReturnDate() {
 }
 
 async function callCreateDrill() {
-  console.log(nominatedSoldiers.value);
-
+  let target;
   try {
     if (drillSrc.value.id) {
+      target = drillSrc.value.id;
       await updateDrill(drillSrc.value, nominatedSoldiers.value);
     } else {
-      await createDrill(drillSrc.value, nominatedSoldiers.value);
+      target = await createDrill(drillSrc.value, nominatedSoldiers.value);
     }
-    useRouter;
+    if (target) {
+      useRouter().push("/drills/" + target);
+    }
   } catch (error) {
     window.alert(error);
   }

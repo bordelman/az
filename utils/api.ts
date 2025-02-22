@@ -1,6 +1,6 @@
 import type {INomination, ISoldier, EAttendance, IParking} from "~/types";
 
-const apiBaseUrl = 'http://localhost:8000/api/',
+const apiBaseUrl = 'http://pecaj.fun/az/api/',
   {loadingEnd, loadingStart} = useLayout();
 
 // AUTH
@@ -155,7 +155,7 @@ export async function getNominations(personalNumber: string): Promise<Array<INom
 }
 
 // DRILLS
-export async function createDrill(drill: Record<any, any>, nominated: Array<number>): Promise<boolean> {
+export async function createDrill(drill: Record<any, any>, nominated: Array<number>): Promise<number> {
   loadingStart();
   try {
     const response = await fetch(apiBaseUrl + "drills", {
@@ -175,7 +175,7 @@ export async function createDrill(drill: Record<any, any>, nominated: Array<numb
     return id;
   } catch (error) {
     window.alert(error);
-    return false;
+    return 0;
   } finally {
     loadingEnd();
   }
@@ -216,7 +216,7 @@ export async function getDrillNominations(drillId: string, status?: number): Pro
 export async function updateDrillNominations(id: number, nominated: Array<number>) {
   loadingStart();
   try {
-    await fetch(`${apiBaseUrl}drills/${id}/nominations`, {
+    const response = await fetch(`${apiBaseUrl}drills/${id}/nominations`, {
       method: "PUT",
       body: JSON.stringify({nominated}),
       headers: {
@@ -224,6 +224,7 @@ export async function updateDrillNominations(id: number, nominated: Array<number
         "Content-Type": "application/json",
       }
     });
+    return response.json();
   } catch (error) {
     window.alert(error);
   } finally {
@@ -247,6 +248,7 @@ export async function updateDrill(drill: Record<any, any>, nominated: Array<numb
       }),
       updateDrillNominations(id, nominated)
     ]);
+    drill.id = id;
     return id;
   } catch (error) {
     window.alert(error);
@@ -272,7 +274,7 @@ export async function removeDrill(id: number) {
   }
 }
 
-export async function reactToNomination(drillId: string, attendance: EAttendance, data?: {accommodation?: boolean, parking?: IParking}) {
+export async function reactToNomination(drillId: string, attendance: EAttendance, data?: {accommodation?: boolean, parking?: IParking;}) {
   const {accommodation, parking} = data || {};
 
   loadingStart();
