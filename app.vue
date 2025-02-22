@@ -3,7 +3,10 @@
     v-if="loaded"
     :show="isLoading"
   >
-    <NConfigProvider :locale="customizedLocale" :date-locale="dateCsCZ">
+    <NConfigProvider
+      :locale="customizedLocale"
+      :date-locale="dateCsCZ"
+    >
       <n-modal-provider>
         <section class="layout">
           <LayoutHeader />
@@ -67,15 +70,19 @@ const { isLoading, loadingEnd } = useLayout(),
   customizedLocale = createLocale(
     {
       DatePicker: {
-        dateFormat: 'd.M.yyyy',
-        dayFormat: 'EEE',
-        monthFormat: 'MMM',
-        yearFormat: 'yy',
+        dateFormat: "d.M.yyyy",
+        dayFormat: "EEE",
+        monthFormat: "MMM",
+        yearFormat: "yy",
         firstDayOfWeek: 0,
       },
     },
     csCZ
   );
+
+useHead({
+  title: "AZ Plzeň",
+});
 
 onMounted(async () => {
   await autoLogIn();
