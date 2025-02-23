@@ -34,6 +34,19 @@
       />
     </div>
     <div>
+      Pracovně lékařská prohlídka do:
+      <input
+        type="date"
+        v-model="soldier.medicalExaminationDue"
+      />
+    </div>
+    <div>
+      Zdravotní klasifikace:
+      <select v-model="soldier.medicalClasification" >
+        <option value="1">1</option>
+      </select>
+    </div>
+    <div>
       Email:
       <input
         type="email"
