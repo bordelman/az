@@ -17,12 +17,12 @@ const { company, platoon, squad, higherPermission } = useState<ISoldier>("logged
   }),
   toTemplate = "/soldiers/" + soldier.personalNumber,
   to = computed(() => {
-    if (!higherPermission) return;
-    if (company !== soldier.company) return;
-    if (!platoon) return toTemplate;
-    if (platoon !== soldier.platoon) return;
-    if (!squad) return toTemplate;
-    if (squad !== soldier.squad) return;
-    return toTemplate;
+    if (higherPermission) return toTemplate;
+    // if (company !== soldier.company) return;
+    // if (!platoon) return toTemplate;
+    // if (platoon !== soldier.platoon) return;
+    // if (!squad) return toTemplate;
+    // if (squad !== soldier.squad) return;
+    return ;
   });
 </script>
