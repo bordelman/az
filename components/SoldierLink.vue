@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { type ISoldier } from "~/types";
 
-const { company, platoon, squad, rank } = useState<ISoldier>("logged").value,
+const { company, platoon, squad, higherPermission } = useState<ISoldier>("logged").value,
   { soldier } = defineProps({
     soldier: {
       type: Object,
@@ -17,7 +17,7 @@ const { company, platoon, squad, rank } = useState<ISoldier>("logged").value,
   }),
   toTemplate = "/soldiers/" + soldier.personalNumber,
   to = computed(() => {
-    if (rank.id < 7) return;
+    if (!higherPermission) return;
     if (company !== soldier.company) return;
     if (!platoon) return toTemplate;
     if (platoon !== soldier.platoon) return;

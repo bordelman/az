@@ -10,14 +10,14 @@
       <div class="top">
         <NuxtLink to="/soldiers">Přehled vojáků</NuxtLink>
         <NuxtLink
-          v-if="logged.rank.id >= 7"
+          v-if="logged.higherPermission"
           to="/soldiers/new"
         >
           Založit vojáka
         </NuxtLink>
         <NuxtLink to="/drills">Přehled cvičení</NuxtLink>
         <NuxtLink
-          v-if="logged.rank.id >= 7"
+          v-if="logged.higherPermission"
           to="/drills/new"
         >
           Založit cvičení
@@ -25,7 +25,7 @@
       </div>
       <div class="bottom">
         <div class="logged-soldier">
-          {{ logged.rank.abbreviation }}. {{ logged.name }}
+          {{ logged.rank.abbreviation }}. {{ logged.firstname }}
           {{ logged.lastname }}, {{ logged.position.position }} ({{
             logged.company
           }}/{{ logged.platoon || "_" }}/{{ logged.squad || "_" }})
@@ -43,9 +43,11 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { NButton } from "naive-ui";
-const logged = useState("logged");
+import type { ISoldier } from "~/types";
+
+const logged = useState<ISoldier | null>("logged");
 
 function logOut() {
   document.cookie = `army_access_token=;path=/`;

@@ -1,16 +1,26 @@
 <template>
   <section class="footer">
     <NuxtLink to="/soldiers">Přehled vojáků</NuxtLink>
-    <NuxtLink v-if="logged.rank.id >= 7" to="/soldiers/new">Založit vojáka</NuxtLink>
+    <NuxtLink
+      v-if="logged.higherPermission"
+      to="/soldiers/new"
+    >
+      Založit vojáka
+    </NuxtLink>
     <NuxtLink to="/drills">Přehled cvičení</NuxtLink>
-    <NuxtLink v-if="logged.rank.id >= 7" to="/drills/new">Založit cvičení</NuxtLink>
+    <NuxtLink
+      v-if="logged.higherPermission"
+      to="/drills/new"
+    >
+      Založit cvičení
+    </NuxtLink>
   </section>
 </template>
 
 <script setup lang="ts">
-import type {ISoldier} from '~/types';
+import type { ISoldier } from "~/types";
 
-const logged = useState<ISoldier>("logged")
+const logged = useState<ISoldier>("logged");
 </script>
 
 <style lang="scss" scoped>

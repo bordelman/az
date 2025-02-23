@@ -10,8 +10,8 @@
   >
     <h1 class="drill-name">
       <NuxtLink
-        :class="{ 'drill-edit-link': logged.rank.id >= 7 }"
-        :to="logged.rank.id >= 7 ? `/drills/${id}/edit` : undefined"
+        :class="{ 'drill-edit-link': logged.higherPermission }"
+        :to="logged.higherPermission ? `/drills/${id}/edit` : undefined"
       >
         {{ drill.name }}
       </NuxtLink>
@@ -23,7 +23,7 @@
       }})
       <div
         class="controll-panel"
-        v-if="logged.rank.id >= 7"
+        v-if="logged.higherPermission"
       >
         <NButton
           type="error"
@@ -63,6 +63,11 @@
       <section class="attendents">
         <h2>
           Zúčastní se <span class="count">({{ present.length }})</span>
+          <div v-if="logged.higherPermission">
+            <NButton @click="exportCsv('complet')">vše</NButton>
+            <NButton @click="exportCsv('parking')">parkování</NButton>
+            <NButton @click="exportCsv('accommodation')">ubytování</NButton>
+          </div>
         </h2>
         <ul
           v-if="!isLoading"
@@ -109,7 +114,9 @@
                   />
                 </svg>
               </template>
-              Upravit parkování{{ drill.offerAccommodation ? '/ubytování' : ''}}
+              Upravit parkování{{
+                drill.offerAccommodation ? "/ubytování" : ""
+              }}
             </NTooltip>
           </li>
         </ul>
@@ -205,7 +212,11 @@ const { isLoading } = useLayout(),
   parking: Ref<IParking> = ref({ color: "", spz: "", brand: "" }),
   drill = ref((await getDrills({ id }))[0]),
   nominations = ref(await getDrillNominations(id)),
-  myNomination = computed(() => nominations.value.find(nomination => nomination.soldier.personalNumber === myId)),
+  myNomination = computed(() =>
+    nominations.value.find(
+      (nomination) => nomination.soldier.personalNumber === myId
+    )
+  ),
   present = computed(() =>
     nominations.value.filter(
       (nomination) => nomination.status === EAttendance.Present
@@ -280,6 +291,62 @@ async function addMe() {
 
 async function removeMe() {
   nominations.value = await reactToNomination(id, EAttendance.Absent);
+}
+
+function exportCsv(parameter: "complet" | "parking" | "accommodation") {
+  let fileName = "";
+
+  const headRow = ["Osobní číslo", "Hodnost", "Jméno", "Příjmení"],
+    data: Array<string | number> = [],
+    addRow = (row: Array<string | number>) => {
+      data.push(row.join(";") + "\n");
+    },
+    a = document.createElement("a");
+
+  switch (parameter) {
+    case "accommodation":
+    fileName = 'Ubytování'
+    break;
+    case "complet":
+      headRow.push("Ubytování", "Parkování");
+      fileName = 'Komplet';
+      break;
+    case "parking":
+      headRow.push("Parkování");
+      fileName = 'Parkování'
+      break;
+  }
+  addRow(headRow);
+
+  for (const nomination of present.value) {
+    const { accommodation, parking, soldier } = nomination,
+      { firstname, lastname, personalNumber, rank } = soldier,
+      row = [personalNumber, rank.rank, firstname, lastname],
+      rowAccommodation = accommodation ? "Ano" : "Ne",
+      rowParking = parking ? Object.values(parking || {}).join(", ") : "Ne";
+
+    switch (parameter) {
+      case "accommodation":
+        if (accommodation) {
+          addRow(row);
+        }
+        break;
+      case "complet":
+        row.push(rowAccommodation, rowParking);
+        addRow(row);
+        break;
+      case "parking":
+        if (parking) {
+          row.push(rowParking);
+          addRow(row);
+        }
+        break;
+    }
+  }
+
+  a.href = window.URL.createObjectURL(new Blob([data.join("")]));
+  a.download = `${fileName} - ${drill.value.name}.csv`;
+  a.click();
 }
 </script>
 

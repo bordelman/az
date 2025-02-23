@@ -34,6 +34,7 @@ export interface ISoldier {
 	position: IPosition;
 	rank: IRank;
 	squad: number | null;
+	higherPermission: boolean
 }
 
 export interface IParking {

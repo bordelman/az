@@ -133,7 +133,7 @@
     >
       Změnit heslo
     </NButton>
-    <template v-if="logged?.rank.id >= 7">
+    <template v-if="logged.higherPermission">
       <NButton
         v-if="!edit"
         @click="edit = true"

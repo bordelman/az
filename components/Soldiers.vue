@@ -216,7 +216,7 @@ const { medicalExaminationDue } = defineProps({
         },
       ];
 
-    if (logged.value.rank.id < 7) {
+    if (!logged.value.higherPermission) {
       columns.pop();
       columns.shift();
     }
@@ -224,7 +224,7 @@ const { medicalExaminationDue } = defineProps({
     return columns;
   }),
   rowProps = (row: ISoldier) => {
-    if (logged.value.rank.id > 7) {
+    if (logged.value.higherPermission) {
       return {
         style: "cursor: pointer;",
         onClick: () => {
