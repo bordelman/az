@@ -1,7 +1,7 @@
-import type {INomination, ISoldier, EAttendance, IParking} from "~/types";
+import type { INomination, ISoldier, EAttendance, IParking } from "~/types";
 
-const apiBaseUrl = 'https://pecaj.fun/az/api/',
-  {loadingEnd, loadingStart} = useLayout();
+const apiBaseUrl = "https://pecaj.fun/az/api/",
+  { loadingEnd, loadingStart } = useLayout();
 
 // AUTH
 
@@ -14,7 +14,7 @@ export async function logIn(login: string, password: string) {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
       },
-      body: JSON.stringify({login, password})
+      body: JSON.stringify({ login, password }),
     });
     if (response.status === 200) {
       const result = await response.json();
@@ -37,8 +37,8 @@ export async function autoLogIn() {
   try {
     const response = await fetch(`${apiBaseUrl}auth/auto-login`, {
       headers: {
-        Authorization: getBearerToken()
-      }
+        Authorization: getBearerToken(),
+      },
     });
     if (response.status === 200) {
       const result = await response.json();
@@ -53,7 +53,11 @@ export async function autoLogIn() {
   }
 }
 
-export async function changePassword(oldPassword: string, newPassword: string, controllPassword: string) {
+export async function changePassword(
+  oldPassword: string,
+  newPassword: string,
+  controllPassword: string,
+) {
   loadingStart();
 
   try {
@@ -61,15 +65,14 @@ export async function changePassword(oldPassword: string, newPassword: string, c
       method: "POST",
       headers: {
         Authorization: getBearerToken(),
-        "Content-Type": "application/json; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8",
       },
-      body: JSON.stringify({oldPassword, newPassword, controllPassword})
+      body: JSON.stringify({ oldPassword, newPassword, controllPassword }),
     });
     if (response.status === 200) {
       const result = await response.json();
       console.log(result);
-    }
-    else {
+    } else {
       throw new Error((await response.json()).message);
     }
   } catch (error) {
@@ -83,15 +86,19 @@ export async function changePassword(oldPassword: string, newPassword: string, c
 export async function createSoldier(soldier: Record<any, any>) {
   loadingStart();
 
+  console.log(soldier);
+
   try {
-    return await (await fetch(`${apiBaseUrl}soldiers`, {
-      method: "POST",
-      body: JSON.stringify(soldier),
-      headers: {
-        Authorization: getBearerToken(),
-        "Content-Type": "application/json",
-      }
-    })).json();
+    return await (
+      await fetch(`${apiBaseUrl}soldiers`, {
+        method: "POST",
+        body: JSON.stringify(soldier),
+        headers: {
+          Authorization: getBearerToken(),
+          "Content-Type": "application/json",
+        },
+      })
+    ).json();
   } catch (error) {
     console.log(error);
   } finally {
@@ -99,16 +106,20 @@ export async function createSoldier(soldier: Record<any, any>) {
   }
 }
 
-export async function getSoldiers(params: Record<string, string>): Promise<Array<ISoldier>> {
+export async function getSoldiers(
+  params: Record<string, string>,
+): Promise<Array<ISoldier>> {
   loadingStart();
 
   const query = new URLSearchParams(params);
   try {
-    return await (await fetch(`${apiBaseUrl}soldiers/search?${query}`, {
-      headers: {
-        Authorization: getBearerToken()
-      }
-    })).json();
+    return await (
+      await fetch(`${apiBaseUrl}soldiers/search?${query}`, {
+        headers: {
+          Authorization: getBearerToken(),
+        },
+      })
+    ).json();
   } catch (error) {
     console.log(error);
     return [];
@@ -120,16 +131,18 @@ export async function getSoldiers(params: Record<string, string>): Promise<Array
 export async function editSoldier(soldier: Record<any, any>) {
   loadingStart();
 
-  const {personalNumber} = soldier;
+  const { personalNumber } = soldier;
   try {
-    return await (await fetch(`${apiBaseUrl}soldiers/${personalNumber}`, {
-      method: "PATCH",
-      body: JSON.stringify(soldier),
-      headers: {
-        Authorization: getBearerToken(),
-        "Content-Type": "application/json",
-      }
-    })).json();
+    return await (
+      await fetch(`${apiBaseUrl}soldiers/${personalNumber}`, {
+        method: "PATCH",
+        body: JSON.stringify(soldier),
+        headers: {
+          Authorization: getBearerToken(),
+          "Content-Type": "application/json",
+        },
+      })
+    ).json();
   } catch (error) {
     console.log(error);
   } finally {
@@ -137,14 +150,18 @@ export async function editSoldier(soldier: Record<any, any>) {
   }
 }
 
-export async function getNominations(personalNumber: string): Promise<Array<INomination>> {
+export async function getNominations(
+  personalNumber: string,
+): Promise<Array<INomination>> {
   loadingStart();
   try {
-    return await (await fetch(`${apiBaseUrl}soldiers/${personalNumber}/nominations`, {
-      headers: {
-        Authorization: getBearerToken()
-      }
-    })).json();
+    return await (
+      await fetch(`${apiBaseUrl}soldiers/${personalNumber}/nominations`, {
+        headers: {
+          Authorization: getBearerToken(),
+        },
+      })
+    ).json();
   } catch (error) {
     window.alert(error);
     console.log(error);
@@ -155,18 +172,21 @@ export async function getNominations(personalNumber: string): Promise<Array<INom
 }
 
 // DRILLS
-export async function createDrill(drill: Record<any, any>, nominated: Array<number>): Promise<number> {
+export async function createDrill(
+  drill: Record<any, any>,
+  nominated: Array<number>,
+): Promise<number> {
   loadingStart();
   try {
     const response = await fetch(apiBaseUrl + "drills", {
-      method: "POST",
-      body: JSON.stringify(drill),
-      headers: {
-        Authorization: getBearerToken(),
-        "Content-Type": "application/json"
-      },
-    }),
-      {message, id} = await response.json();
+        method: "POST",
+        body: JSON.stringify(drill),
+        headers: {
+          Authorization: getBearerToken(),
+          "Content-Type": "application/json",
+        },
+      }),
+      { message, id } = await response.json();
 
     if (!response.ok) {
       throw new Error(message);
@@ -185,11 +205,13 @@ export async function getDrills(params?: Record<string, any>) {
   loadingStart();
   const query = new URLSearchParams(params);
   try {
-    return await (await fetch(`${apiBaseUrl}drills/search?${query}`, {
-      headers: {
-        Authorization: getBearerToken()
-      }
-    })).json();
+    return await (
+      await fetch(`${apiBaseUrl}drills/search?${query}`, {
+        headers: {
+          Authorization: getBearerToken(),
+        },
+      })
+    ).json();
   } catch (error) {
     console.log(error);
   } finally {
@@ -197,14 +219,22 @@ export async function getDrills(params?: Record<string, any>) {
   }
 }
 
-export async function getDrillNominations(drillId: string, status?: number): Promise<Array<INomination>> {
+export async function getDrillNominations(
+  drillId: string,
+  status?: number,
+): Promise<Array<INomination>> {
   loadingStart();
   try {
-    return await (await fetch(`${apiBaseUrl}drills/${drillId}/nominations${status !== undefined ? ('?status=' + status) : ''}`, {
-      headers: {
-        Authorization: getBearerToken()
-      }
-    })).json();
+    return await (
+      await fetch(
+        `${apiBaseUrl}drills/${drillId}/nominations${status !== undefined ? "?status=" + status : ""}`,
+        {
+          headers: {
+            Authorization: getBearerToken(),
+          },
+        },
+      )
+    ).json();
   } catch (error) {
     console.log(error);
     return [];
@@ -213,16 +243,19 @@ export async function getDrillNominations(drillId: string, status?: number): Pro
   }
 }
 
-export async function updateDrillNominations(id: number, nominated: Array<number>) {
+export async function updateDrillNominations(
+  id: number,
+  nominated: Array<number>,
+) {
   loadingStart();
   try {
     const response = await fetch(`${apiBaseUrl}drills/${id}/nominations`, {
       method: "PUT",
-      body: JSON.stringify({nominated}),
+      body: JSON.stringify({ nominated }),
       headers: {
         Authorization: getBearerToken(),
         "Content-Type": "application/json",
-      }
+      },
     });
     return response.json();
   } catch (error) {
@@ -232,7 +265,10 @@ export async function updateDrillNominations(id: number, nominated: Array<number
   }
 }
 
-export async function updateDrill(drill: Record<any, any>, nominated: Array<number>): Promise<boolean> {
+export async function updateDrill(
+  drill: Record<any, any>,
+  nominated: Array<number>,
+): Promise<boolean> {
   loadingStart();
   try {
     const id = drill.id;
@@ -246,7 +282,7 @@ export async function updateDrill(drill: Record<any, any>, nominated: Array<numb
           "Content-Type": "application/json",
         },
       }),
-      updateDrillNominations(id, nominated)
+      updateDrillNominations(id, nominated),
     ]);
     drill.id = id;
     return id;
@@ -261,12 +297,14 @@ export async function updateDrill(drill: Record<any, any>, nominated: Array<numb
 export async function removeDrill(id: number) {
   loadingStart();
   try {
-    await (await fetch(`${apiBaseUrl}drills/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: getBearerToken()
-      }
-    })).json();
+    await (
+      await fetch(`${apiBaseUrl}drills/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: getBearerToken(),
+        },
+      })
+    ).json();
   } catch (error) {
     console.log(error);
   } finally {
@@ -274,20 +312,25 @@ export async function removeDrill(id: number) {
   }
 }
 
-export async function reactToNomination(drillId: string, attendance: EAttendance, data?: {accommodation?: boolean, parking?: IParking;}) {
-  const {accommodation, parking} = data || {};
+export async function reactToNomination(
+  drillId: string,
+  attendance: EAttendance,
+  data?: { accommodation?: boolean; parking?: IParking },
+) {
+  const { accommodation, parking } = data || {};
 
   loadingStart();
   try {
-    return await (await fetch(`${apiBaseUrl}drills/${drillId}/nomination`, {
-      method: "PATCH",
-      body: JSON.stringify({attendance, parking, accommodation}),
-      headers: {
-        Authorization: getBearerToken(),
-        "Content-Type": "application/json",
-      }
-    }
-    )).json();
+    return await (
+      await fetch(`${apiBaseUrl}drills/${drillId}/nomination`, {
+        method: "PATCH",
+        body: JSON.stringify({ attendance, parking, accommodation }),
+        headers: {
+          Authorization: getBearerToken(),
+          "Content-Type": "application/json",
+        },
+      })
+    ).json();
   } catch (error) {
     console.log(error);
   } finally {
@@ -299,11 +342,13 @@ export async function reactToNomination(drillId: string, attendance: EAttendance
 export async function getRanks() {
   loadingStart();
   try {
-    return await (await fetch(`${apiBaseUrl}enums/ranks`, {
-      headers: {
-        Authorization: getBearerToken()
-      }
-    })).json();
+    return await (
+      await fetch(`${apiBaseUrl}enums/ranks`, {
+        headers: {
+          Authorization: getBearerToken(),
+        },
+      })
+    ).json();
   } catch (error) {
     console.log(error);
   } finally {
@@ -314,11 +359,13 @@ export async function getRanks() {
 export async function getPositions() {
   loadingStart();
   try {
-    return await (await fetch(`${apiBaseUrl}enums/positions`, {
-      headers: {
-        Authorization: getBearerToken()
-      }
-    })).json();
+    return await (
+      await fetch(`${apiBaseUrl}enums/positions`, {
+        headers: {
+          Authorization: getBearerToken(),
+        },
+      })
+    ).json();
   } catch (error) {
     console.log(error);
   } finally {
@@ -327,10 +374,12 @@ export async function getPositions() {
 }
 
 function getBearerToken() {
-  return "Bearer " + document
-    .cookie
-    .split(";")
-    .find(cookie => cookie.includes("army_access_token"))
-    ?.trim()
-    .replace("army_access_token=", "");
+  return (
+    "Bearer " +
+    document.cookie
+      .split(";")
+      .find((cookie) => cookie.includes("army_access_token"))
+      ?.trim()
+      .replace("army_access_token=", "")
+  );
 }

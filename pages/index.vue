@@ -1,5 +1,5 @@
 <template>
-  <section class="home-page">
-    <Soldier />
-  </section>
+    <section class="home-page">
+        <Soldier />
+    </section>
 </template>
