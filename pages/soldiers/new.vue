@@ -33,10 +33,9 @@
         </div>
         <div>
             Pracovně lékařská prohlídka do:
-            <input
-                type="date"
-                v-model="soldier.medicalExaminationDue"
-                placeholder="Zdravotní prohlídka do"
+            <NDatePicker
+                v-model:value="soldier.medicalExaminationDue"
+                placeholder="Pracovně lékařská prohlídka do"
             />
         </div>
         <div>
@@ -96,9 +95,10 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NInput, NInputNumber, NSelect } from "naive-ui";
+import { NButton, NDatePicker, NInput, NInputNumber, NSelect } from "naive-ui";
+import type { ISoldier } from "~/types";
 
-const soldier = reactive({
+const soldier: ISoldier = reactive({
         position: 1,
         rank: 1,
         company: 1,
@@ -137,10 +137,19 @@ const soldier = reactive({
 async function callCreateSoldier() {
     if (!soldier.platoon) soldier.platoon = null;
     if (!soldier.squad) soldier.squad = null;
-
+    soldier.medicalExaminationDue = parseDate(soldier.medicalExaminationDue);
     const soldierCreated = await createSoldier(soldier);
 
     useRouter().replace("/soldiers/" + soldierCreated.personalNumber);
+}
+
+function parseDate(date: Date) {
+    const dateSource = new Date(date),
+        year = dateSource.getFullYear(),
+        month = dateSource.getMonth() + 1,
+        day = dateSource.getDate();
+
+    return `${year}-${(month < 10 ? "0" : "") + month}-${(day < 10 ? "0" : "") + day}`;
 }
 </script>
 

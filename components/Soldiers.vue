@@ -1,23 +1,40 @@
 <template>
-    <NDataTable
-        ref="table"
-        striped
-        :columns="columns"
-        :data="soldiers"
-        :row-key="(row: RowData) => row.personalNumber"
-        :row-props="rowProps"
-        :on-update:filters="onFilterChange"
-    />
+    <div class="soldier">
+        <div class="clear-button">
+            <NButton v-if="filters" @click="clearFilters"
+                >Restartovat filtry</NButton
+            >
+            <NButton v-if="sorters" @click="clearSorter"
+                >Restartovat řazení</NButton
+            >
+        </div>
+        <NDataTable
+            ref="table"
+            striped
+            :columns="columns"
+            :data="soldiers"
+            :row-key="(row: RowData) => row.personalNumber"
+            :row-props="rowProps"
+            :on-update:filters="onFilterChange"
+            :on-update:sorter="onSorterChange"
+        />
+    </div>
 </template>
 
 <script setup lang="ts">
-import { NDataTable, type DataTableFilterState } from "naive-ui";
+import {
+    NButton,
+    NDataTable,
+    type DataTableFilterState,
+    type DataTableSortState,
+} from "naive-ui";
 import { getSoldiers } from "@/utils/api";
 import type { ISoldier } from "~/types";
 import type { RowData } from "naive-ui/es/data-table/src/interface";
 
 const table = ref(),
     filters = ref(),
+    sorters = ref(),
     { medicalExaminationDue } = defineProps({
         medicalExaminationDue: {
             type: String,
@@ -267,8 +284,30 @@ const table = ref(),
         }
     };
 
+function clearFilters() {
+    console.log(table.value);
+    table.value.filter(null);
+    filters.value = null;
+}
+
+function clearSorter() {
+    table.value.sort(null);
+    sorters.value = null;
+}
 function onFilterChange(filtersSrc: DataTableFilterState) {
     filters.value = filtersSrc;
+}
+function onSorterChange(sortersSrc: DataTableSortState) {
+    console.log("ARRAY", Array.isArray(sortersSrc), sortersSrc);
+    if (Array.isArray(sortersSrc)) {
+        if (sortersSrc.every((sorter) => !sorter.order)) {
+            return (sorters.value = null);
+        }
+    } else if (!sortersSrc.order) {
+        return (sorters.value = null);
+    }
+
+    sorters.value = sortersSrc;
 }
 watch(filters, () => {
     filteredSoldiers.value = table.value.paginatedData.map(

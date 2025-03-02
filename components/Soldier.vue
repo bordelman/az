@@ -48,7 +48,12 @@
                     )
                 }}
             </span>
-            <input v-else type="date" v-model="soldier.medicalExaminationDue" />
+            <NDatePicker
+                v-else
+                v-model:value="soldier.medicalExaminationDue"
+                placeholder="Pracovně lékařská prohlídka do"
+                @update:value="updateReturnDate"
+            />
         </div>
         <div>
             Zdravotní klasifikace:
@@ -311,6 +316,7 @@
 <script setup lang="ts">
 import {
     NButton,
+    NDatePicker,
     NInput,
     NInputNumber,
     NSelect,
@@ -393,7 +399,9 @@ async function callEditSoldier() {
                 company: soldier.value.company,
                 platoon: soldier.value.platoon,
                 squad: soldier.value.squad,
-                medicalExaminationDue: soldier.value.medicalExaminationDue,
+                medicalExaminationDue: parseDate(
+                    soldier.value.medicalExaminationDue,
+                ),
                 medicalClasification: soldier.value.medicalClasification,
             }),
         );
@@ -402,6 +410,15 @@ async function callEditSoldier() {
         window.alert(error);
         console.log(error);
     }
+}
+
+function parseDate(date: Date) {
+    const dateSource = new Date(date),
+        year = dateSource.getFullYear(),
+        month = dateSource.getMonth() + 1,
+        day = dateSource.getDate();
+
+    return `${year}-${(month < 10 ? "0" : "") + month}-${(day < 10 ? "0" : "") + day}`;
 }
 
 function callChangePassword() {
@@ -418,6 +435,10 @@ function callChangePassword() {
 
 <style lang="scss" scoped>
 .soldier {
+    > div {
+        display: grid;
+        grid-template-columns: 250px 200px;
+    }
     .lists {
         display: flex;
         justify-content: space-between;
