@@ -303,7 +303,7 @@ function onSorterChange(sortersSrc: DataTableSortState) {
         if (sortersSrc.every((sorter) => !sorter.order)) {
             return (sorters.value = null);
         }
-    } else if (!sortersSrc.order) {
+    } else if (!sortersSrc?.order) {
         return (sorters.value = null);
     }
 

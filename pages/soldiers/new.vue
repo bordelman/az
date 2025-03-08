@@ -17,8 +17,8 @@
             />
         </div>
         <div>
-            Titul:
-            <NInput v-model:value="soldier.title" placeholder="Titul" />
+            Titul před jménem:
+            <NInput v-model:value="soldier.titleBefore" placeholder="Titul" />
         </div>
         <div>
             Křestní jméno:
@@ -30,6 +30,10 @@
         <div>
             Příjmení:
             <NInput v-model:value="soldier.lastname" placeholder="Příjmení" />
+        </div>
+        <div>
+            Titul za jménem:
+            <NInput v-model:value="soldier.titleAfter" placeholder="Titul" />
         </div>
         <div>
             Pracovně lékařská prohlídka do:

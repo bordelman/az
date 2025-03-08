@@ -2,7 +2,7 @@
     <section class="soldier">
         <div v-if="logged.personalNumber === soldier.personalNumber">
             Osobní číslo:
-            <span v-if="!edit">{{ soldier.personalNumber }}</span>
+            <span v-if="!edit || !logged.higherPermission">{{ soldier.personalNumber }}</span>
             <NInputNumber
                 v-else
                 v-model:value="soldier.personalNumber"
@@ -11,7 +11,8 @@
             />
         </div>
         <div>
-            Hodnost: <span v-if="!edit">{{ soldier.rank.rank }}</span>
+            Hodnost:
+            <span v-if="!edit || !logged.higherPermission">{{ soldier.rank.rank }}</span>
             <NSelect
                 v-else
                 v-model:value="soldier.rank.id"
@@ -20,11 +21,13 @@
             />
         </div>
         <div>
-            Titul: <span v-if="!edit">{{ soldier.title }}</span>
-            <NInput v-else v-model:value="soldier.title" placeholder="Titul" />
+            Titul před jménem:
+            <span v-if="!edit || !logged.higherPermission">{{ soldier.titleBefore }}</span>
+            <NInput v-else v-model:value="soldier.titleBefore" placeholder="Titul před jménem" />
         </div>
         <div>
-            Křestní jméno: <span v-if="!edit">{{ soldier.firstname }}</span>
+            Křestní jméno:
+            <span v-if="!edit || !logged.higherPermission">{{ soldier.firstname }}</span>
             <NInput
                 v-else
                 v-model:value="soldier.firstname"
@@ -32,12 +35,18 @@
             />
         </div>
         <div>
-            Příjmení: <span v-if="!edit">{{ soldier.lastname }}</span>
+            Příjmení:
+            <span v-if="!edit || !logged.higherPermission">{{ soldier.lastname }}</span>
             <NInput
                 v-else
                 v-model:value="soldier.lastname"
                 placeholder="Příjmení"
             />
+        </div>
+        <div>
+            Titul před jménem:
+            <span v-if="!edit || !logged.higherPermission">{{ soldier.titleAfter }}</span>
+            <NInput v-else v-model:value="soldier.titleAfter" placeholder="Titul za jménem" />
         </div>
         <div>
             Pracovně lékařská prohlídka do:
@@ -57,7 +66,7 @@
         </div>
         <div>
             Zdravotní klasifikace:
-            <span v-if="!edit">{{ soldier.medicalClasification }}</span>
+            <span v-if="!edit || !logged.higherPermission">{{ soldier.medicalClasification }}</span>
             <NSelect
                 v-else
                 v-model:value="soldier.medicalClasification"
@@ -80,12 +89,12 @@
             <NInput
                 v-else
                 type="tel"
-                v-model="soldier.mobile"
+                v-model:value="soldier.mobile"
                 placeholder="Mobil"
             />
         </div>
         <div>
-            Pozice: <span v-if="!edit">{{ soldier.position.position }}</span>
+            Pozice: <span v-if="!edit || !logged.higherPermission">{{ soldier.position.position }}</span>
             <NSelect
                 v-else
                 v-model:value="soldier.position.id"
@@ -94,7 +103,7 @@
             />
         </div>
         <div>
-            Rota: <span v-if="!edit">{{ soldier.company }}</span>
+            Rota: <span v-if="!edit || !logged.higherPermission">{{ soldier.company }}</span>
             <NSelect
                 v-else
                 v-model:value="soldier.company"
@@ -103,7 +112,7 @@
             />
         </div>
         <div v-if="soldier.platoon || edit">
-            Četa: <span v-if="!edit">{{ soldier.platoon }}</span>
+            Četa: <span v-if="!edit || !logged.higherPermission">{{ soldier.platoon }}</span>
             <NSelect
                 v-else
                 v-model:value="soldier.platoon"
@@ -112,7 +121,7 @@
             />
         </div>
         <div v-if="soldier.squad || edit">
-            Družstvo: <span v-if="!edit">{{ soldier.squad }}</span>
+            Družstvo: <span v-if="!edit || !logged.higherPermission">{{ soldier.squad }}</span>
             <NSelect
                 v-else
                 v-model:value="soldier.squad"
@@ -126,10 +135,8 @@
         >
             Změnit heslo
         </NButton>
-        <template v-if="logged.higherPermission">
-            <NButton v-if="!edit" @click="edit = true"> Upravit </NButton>
-            <NButton v-else @click="callEditSoldier"> Uložit změny </NButton>
-        </template>
+        <NButton v-if="!edit" @click="edit = true"> Upravit </NButton>            
+        <NButton v-else @click="callEditSoldier"> Uložit změny </NButton>
         <section class="drills">
             <h2>Moje nominace</h2>
             <section class="lists">
@@ -388,7 +395,8 @@ async function callEditSoldier() {
         Object.assign(
             soldier.value,
             await editSoldier({
-                title: soldier.value.title,
+                titleAfter: soldier.value.titleAfter || null,
+                titleBefore: soldier.value.titleBefore || null,
                 personalNumber: soldier.value.personalNumber,
                 firstname: soldier.value.firstname,
                 lastname: soldier.value.lastname,

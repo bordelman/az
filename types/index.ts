@@ -22,7 +22,8 @@ export interface INomination {
   status: EAttendance;
 }
 export interface ISoldier {
-  title: string;
+  titleAfter: string;
+  titleBefore: string;
   company: number;
   email: string;
   firstname: string;
