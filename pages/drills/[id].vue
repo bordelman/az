@@ -208,14 +208,20 @@ const { isLoading } = useLayout(),
             ),
     ),
     absent = computed(() =>
-        nominations.value.filter(
-            (nomination) => nomination.status === EAttendance.Absent,
-        ),
+        nominations.value
+            .filter((nomination) => nomination.status === EAttendance.Absent)
+            .sort((a, b) =>
+                a.soldier.lastname.localeCompare(b.soldier.lastname),
+            ),
     ),
     notResponded = computed(() =>
-        nominations.value.filter(
-            (nomination) => nomination.status === EAttendance.NotResponded,
-        ),
+        nominations.value
+            .filter(
+                (nomination) => nomination.status === EAttendance.NotResponded,
+            )
+            .sort((a, b) =>
+                a.soldier.lastname.localeCompare(b.soldier.lastname),
+            ),
     ),
     nominated = computed(() =>
         nominations.value.map(
