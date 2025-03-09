@@ -44,7 +44,7 @@
             />
         </div>
         <div>
-            Titul před jménem:
+            Titul za jménem:
             <span v-if="!edit || !logged.higherPermission">{{ soldier.titleAfter }}</span>
             <NInput v-else v-model:value="soldier.titleAfter" placeholder="Titul za jménem" />
         </div>
