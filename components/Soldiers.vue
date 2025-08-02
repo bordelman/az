@@ -35,17 +35,9 @@ import type { RowData } from "naive-ui/es/data-table/src/interface";
 const table = ref(),
     filters = ref(),
     sorters = ref(),
-    { medicalExaminationDue } = defineProps({
-        medicalExaminationDue: {
-            type: String,
-            default: "1970-01-01",
-        },
-    }),
     logged = useState<ISoldier>("logged"),
     soldiers: Ref<Array<ISoldier>> = ref(
-        await getSoldiers({
-            medicalExaminationDue,
-        }),
+        await getSoldiers({}),
     ),
     filteredSoldiers: Ref<Array<ISoldier>> = ref(soldiers.value),
     columns = computed(() => {

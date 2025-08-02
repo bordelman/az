@@ -339,7 +339,7 @@ function exportCsv(parameter: "complet" | "parking" | "accommodation") {
         }
     }
 
-    a.href = window.URL.createObjectURL(new Blob([data.join("")]));
+    a.href = window.URL.createObjectURL(new Blob(["\uFEFF" + data.join("")], { type: "application/vnd.ms-excel;charset=utf-8;" }));
     a.download = `${fileName} - ${drill.value.name}.csv`;
     a.click();
 }
