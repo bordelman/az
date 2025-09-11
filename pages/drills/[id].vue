@@ -1,15 +1,9 @@
 <template>
-    <NuxtPage
-        v-if="useRoute().path.includes('edit')"
-        :drill="drill"
-        :nominated="nominated"
-    />
+    <NuxtPage v-if="useRoute().path.includes('edit')" :drill="drill" :nominated="nominated" />
     <section v-else class="drill">
         <h1 class="drill-name">
-            <NuxtLink
-                :class="{ 'drill-edit-link': logged.higherPermission }"
-                :to="logged.higherPermission ? `/drills/${id}/edit` : undefined"
-            >
+            <NuxtLink :class="{ 'drill-edit-link': logged.higherPermission }"
+                :to="logged.higherPermission ? `/drills/${id}/edit` : undefined">
                 {{ drill.name }}
             </NuxtLink>
         </h1>
@@ -24,28 +18,19 @@
                 </NButton>
             </div>
         </div>
+        <NCard v-if="drill.additionalInfo" title="Dodatečné informace">
+            <div class="additional-info">
+                {{ drill.additionalInfo }}
+            </div>
+        </NCard>
         <!-- <section class="additional-info">
       <a href="">Dodatečné info</a>
     </section> -->
-        <section
-            v-if="nominated.includes(logged.personalNumber)"
-            class="controll-panel"
-        >
-            <NButton
-                ghost
-                type="primary"
-                v-if="!alreadyIn"
-                @click="showParkingModal = true"
-            >
+        <section v-if="nominated.includes(logged.personalNumber)" class="controll-panel">
+            <NButton ghost type="primary" v-if="!alreadyIn" @click="showParkingModal = true">
                 Zúčastním se
             </NButton>
-            <NButton
-                ghost
-                type="error"
-                v-if="!alreadyAbsent"
-                class="negative"
-                @click="removeMe"
-            >
+            <NButton ghost type="error" v-if="!alreadyAbsent" class="negative" @click="removeMe">
                 Nezúčastním se
             </NButton>
         </section>
@@ -57,20 +42,12 @@
                     <span class="count">({{ present.length }})</span>
                     <div v-if="logged.higherPermission">
                         <NButton @click="exportCsv('complet')">vše</NButton>
-                        <NButton @click="exportCsv('parking')"
-                            >parkování</NButton
-                        >
-                        <NButton @click="exportCsv('accommodation')"
-                            >ubytování</NButton
-                        >
+                        <NButton @click="exportCsv('parking')">parkování</NButton>
+                        <NButton @click="exportCsv('accommodation')">ubytování</NButton>
                     </div>
                 </h2>
                 <ul v-if="!isLoading" class="soldiers">
-                    <li
-                        class="soldier"
-                        v-for="(nomination, index) of present"
-                        :key="'soldier-' + index"
-                    >
+                    <li class="soldier" v-for="(nomination, index) of present" :key="'soldier-' + index">
                         <SoldierLink :soldier="nomination.soldier" />
                         <NTooltip v-if="nomination.parking" trigger="hover">
                             <template #trigger>
@@ -83,29 +60,18 @@
                             <div>Barva: {{ nomination.parking.color }}</div>
                             <div>SPZ: {{ nomination.parking.spz }}</div>
                         </NTooltip>
-                        <NTooltip
-                            v-if="nomination.accommodation"
-                            trigger="hover"
-                        >
+                        <NTooltip v-if="nomination.accommodation" trigger="hover">
                             <template #trigger>
                                 <div class="badge">U</div>
                             </template>
                             Zažádal o poskytnutí ubytování
                         </NTooltip>
-                        <NTooltip
-                            v-if="nomination.soldier.personalNumber == myId"
-                        >
+                        <NTooltip v-if="nomination.soldier.personalNumber == myId">
                             <template #trigger>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 512 512"
-                                    height="16px"
-                                    width="16px"
-                                    @click="editNomination"
-                                >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px"
+                                    @click="editNomination">
                                     <path
-                                        d="m487.4 315.7-42.6-24.6c4.3-23.2 4.3-47 0-70.2l42.6-24.6c4.9-2.8 7.1-8.6 5.5-14-11.1-35.6-30-67.8-54.7-94.6-3.8-4.1-10-5.1-14.8-2.3l-42.6 24.6c-17.9-15.4-38.5-27.3-60.8-35.1v-49.1c0-5.6-3.9-10.5-9.4-11.7-36.7-8.2-74.3-7.8-109.2 0-5.5 1.2-9.4 6.1-9.4 11.7v49.2c-22.2 7.9-42.8 19.8-60.8 35.1l-42.5-24.6c-4.9-2.8-11-1.9-14.8 2.3-24.7 26.7-43.6 58.9-54.7 94.6-1.7 5.4.6 11.2 5.5 14l42.6 24.6c-4.3 23.2-4.3 47 0 70.2l-42.6 24.6c-4.9 2.8-7.1 8.6-5.5 14 11.1 35.6 30 67.8 54.7 94.6 3.8 4.1 10 5.1 14.8 2.3l42.6-24.6c17.9 15.4 38.5 27.3 60.8 35.1v49.2c0 5.6 3.9 10.5 9.4 11.7 36.7 8.2 74.3 7.8 109.2 0 5.5-1.2 9.4-6.1 9.4-11.7v-49.2c22.2-7.9 42.8-19.8 60.8-35.1l42.6 24.6c4.9 2.8 11 1.9 14.8-2.3 24.7-26.7 43.6-58.9 54.7-94.6 1.5-5.5-.7-11.3-5.6-14.1zm-231.4 20.3c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z"
-                                    />
+                                        d="m487.4 315.7-42.6-24.6c4.3-23.2 4.3-47 0-70.2l42.6-24.6c4.9-2.8 7.1-8.6 5.5-14-11.1-35.6-30-67.8-54.7-94.6-3.8-4.1-10-5.1-14.8-2.3l-42.6 24.6c-17.9-15.4-38.5-27.3-60.8-35.1v-49.1c0-5.6-3.9-10.5-9.4-11.7-36.7-8.2-74.3-7.8-109.2 0-5.5 1.2-9.4 6.1-9.4 11.7v49.2c-22.2 7.9-42.8 19.8-60.8 35.1l-42.5-24.6c-4.9-2.8-11-1.9-14.8 2.3-24.7 26.7-43.6 58.9-54.7 94.6-1.7 5.4.6 11.2 5.5 14l42.6 24.6c-4.3 23.2-4.3 47 0 70.2l-42.6 24.6c-4.9 2.8-7.1 8.6-5.5 14 11.1 35.6 30 67.8 54.7 94.6 3.8 4.1 10 5.1 14.8 2.3l42.6-24.6c17.9 15.4 38.5 27.3 60.8 35.1v49.2c0 5.6 3.9 10.5 9.4 11.7 36.7 8.2 74.3 7.8 109.2 0 5.5-1.2 9.4-6.1 9.4-11.7v-49.2c22.2-7.9 42.8-19.8 60.8-35.1l42.6 24.6c4.9 2.8 11 1.9 14.8-2.3 24.7-26.7 43.6-58.9 54.7-94.6 1.5-5.5-.7-11.3-5.6-14.1zm-231.4 20.3c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z" />
                                 </svg>
                             </template>
                             Upravit parkování{{
@@ -121,11 +87,7 @@
                     <span class="count">({{ absent.length }})</span>
                 </h2>
                 <ul v-if="!isLoading" class="soldiers">
-                    <li
-                        class="soldier"
-                        v-for="(nomination, index) of absent"
-                        :key="'soldier-' + index"
-                    >
+                    <li class="soldier" v-for="(nomination, index) of absent" :key="'soldier-' + index">
                         <SoldierLink :soldier="nomination.soldier" />
                     </li>
                 </ul>
@@ -136,30 +98,16 @@
                     <span class="count">({{ notResponded.length }})</span>
                 </h2>
                 <ul v-if="!isLoading" class="soldiers">
-                    <li
-                        class="soldier"
-                        v-for="(nomination, index) of notResponded"
-                        :key="'soldier-' + index"
-                    >
+                    <li class="soldier" v-for="(nomination, index) of notResponded" :key="'soldier-' + index">
                         <SoldierLink :soldier="nomination.soldier" />
                     </li>
                 </ul>
             </section>
         </section>
-        <NModal
-            v-model:show="showParkingModal"
-            class="custom-card"
-            preset="card"
-            :style="{ maxWidth: '60ch' }"
-            title="Parkování"
-            :bordered="false"
-            size="huge"
-        >
+        <NModal v-model:show="showParkingModal" class="custom-card" preset="card" :style="{ maxWidth: '60ch' }"
+            title="Parkování" :bordered="false" size="huge">
             <div class="input-row">
-                <NInput
-                    v-model:value="parking.brand"
-                    placeholder="Značka vozu"
-                />
+                <NInput v-model:value="parking.brand" placeholder="Značka vozu" />
             </div>
             <div class="input-row">
                 <NInput v-model:value="parking.color" placeholder="Barva" />
@@ -168,8 +116,7 @@
                 <NInput v-model:value="parking.spz" placeholder="SPZ" />
             </div>
             <div v-if="drill.offerAccommodation" class="input-row">
-                <NCheckbox v-model:checked="accommodation"
-                    >Chci ubytování
+                <NCheckbox v-model:checked="accommodation">Chci ubytování
                 </NCheckbox>
             </div>
             <NButton @click="addMe">
@@ -184,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NCheckbox, NInput, NModal, NTooltip } from "naive-ui";
+import { NButton, NCard, NCheckbox, NInput, NModal, NTooltip } from "naive-ui";
 import { EAttendance, type IParking, type ISoldier } from "~/types";
 
 const { isLoading } = useLayout(),
@@ -357,6 +304,10 @@ function exportCsv(parameter: "complet" | "parking" | "accommodation") {
         }
     }
 
+    .additional-info {
+        white-space: break-spaces;
+    }
+
     .controll-panel {
         display: inline-flex;
         gap: 1rem;
@@ -381,6 +332,7 @@ function exportCsv(parameter: "complet" | "parking" | "accommodation") {
 
                 svg {
                     cursor: pointer;
+
                     path {
                         fill: currentColor;
                     }

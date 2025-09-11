@@ -33,8 +33,9 @@
         <label for="additionlaInfo">Dodatečné info</label>
         <NInput
           id="additionlaInfo"
-          type="text"
+          type="textarea"
           placeholder=""
+          :autosize="{minRows: 1}"
           v-model:value="drillSrc.additionalInfo"
         />
       </div>
@@ -98,6 +99,7 @@ import {
   NCheckbox,
   NDataTable,
   type DataTableRowKey,
+  type DataTableColumns,
 } from "naive-ui";
 import type { RowData } from "naive-ui/es/data-table/src/interface";
 import type { PropType } from "vue";
@@ -301,7 +303,7 @@ const { drill, nominated } = defineProps({
           );
         },
       },
-    ];
+    ] as DataTableColumns;
   }),
   soldiers = ref(
     await getSoldiers({
