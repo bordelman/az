@@ -10,6 +10,9 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@tiptap/extension-link": "^3.4.4",
+    "@tiptap/starter-kit": "^3.4.4",
+    "@tiptap/vue-3": "^3.4.4",
     "naive-ui": "^2.41.0",
     "nuxt": "^3.13.0",
     "vue": "latest",

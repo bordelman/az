@@ -19,9 +19,7 @@
             </div>
         </div>
         <NCard v-if="drill.additionalInfo" title="Dodatečné informace">
-            <div class="additional-info">
-                {{ drill.additionalInfo }}
-            </div>
+            <div class="additional-info" v-html="drill.additionalInfo" />
         </NCard>
         <!-- <section class="additional-info">
       <a href="">Dodatečné info</a>

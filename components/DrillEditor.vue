@@ -3,88 +3,47 @@
     <div class="form">
       <div class="input-row">
         <label for="name">Název cvičení</label>
-        <NInput
-          id="name"
-          type="text"
-          placeholder=""
-          v-model:value="drillSrc.name"
-        />
+        <NInput id="name" type="text" placeholder="" v-model:value="drillSrc.name" />
       </div>
       <div class="input-row">
         <label for="date">Datum cvičení</label>
-        <NDatePicker
-          v-model:value="dateRange"
-          type="daterange"
-          :update-value-on-close="true"
-          @update:value="updateDateRange"
-        />
+        <NDatePicker v-model:value="dateRange" type="daterange" :update-value-on-close="true"
+          @update:value="updateDateRange" />
       </div>
       <div class="input-row">
         <label for="returnDate">Datum návratu</label>
-        <NDatePicker
-          id="returnDate"
-          v-model:value="returnDate"
-          placeholder=""
-          :is-date-disabled="isDateDisabled"
-          @update:value="updateReturnDate"
-        />
+        <NDatePicker id="returnDate" v-model:value="returnDate" placeholder="" :is-date-disabled="isDateDisabled"
+          @update:value="updateReturnDate" />
       </div>
       <div class="input-row">
         <label for="additionlaInfo">Dodatečné info</label>
-        <NInput
-          id="additionlaInfo"
-          type="textarea"
-          placeholder=""
-          :autosize="{minRows: 1}"
-          v-model:value="drillSrc.additionalInfo"
-        />
+        <div class="rich-editor">
+          <div class="toolbar">
+            <button :class="{ active: editor?.isActive('bold') }" @click="toggleBold">B</button>
+            <button :class="{ active: editor?.isActive('italic') }" @click="toggleItalic"><i>I</i></button>
+            <button :class="{ active: editor?.isActive('underline') }" @click="toggleUnderline"><u>U</u></button>
+            <button :class="{ active: editor?.isActive('bulletList') }" @click="toggleBulletList">• List</button>
+          </div>
+          <EditorContent :editor="editor" class="editor-content" />
+        </div>
       </div>
       <div class="input-row">
         <label for="additionlaInfo">Nabídnout ubytování</label>
-        <NCheckbox
-          id="offerAccommodation"
-          :checked-value="1"
-          :unchecked-value="0"
-          v-model:checked="drillSrc.offerAccommodation"
-        />
+        <NCheckbox id="offerAccommodation" :checked-value="1" :unchecked-value="0"
+          v-model:checked="drillSrc.offerAccommodation" />
       </div>
     </div>
-    <NButton
-      :disabled="!drillSrc.dateFrom || !drillSrc.dateTo"
-      @click="showSoldierSelector = true"
-    >
-      Vybrat vojáky{{ nominatedSoldiers.length ? ` (${nominatedSoldiers.length})` : ''}}
+    <NButton :disabled="!drillSrc.dateFrom || !drillSrc.dateTo" @click="showSoldierSelector = true">
+      Vybrat vojáky{{ nominatedSoldiers.length ? ` (${nominatedSoldiers.length})` : '' }}
     </NButton>
-    <NButton
-      :disabled="!drillSrc.dateFrom || !drillSrc.dateTo"
-      @click="callCreateDrill"
-      >Uložit</NButton
-    >
-    <NModal
-      v-model:show="showSoldierSelector"
-      class="custom-card"
-      preset="card"
-      :style="{ maxWidth: '80vw', maxHeight: '80vh' }"
-      title="Nominace"
-      :bordered="false"
-      size="huge"
-    >
-      <NDataTable
-        striped
-        :columns="columns"
-        :data="soldiers"
-        :row-key="(row: RowData) => row.personalNumber"
-        :default-checked-row-keys="nominatedSoldiers"
-        max-height="50vh"
-        @update:checked-row-keys="handleCheck"
-      />
+    <NButton :disabled="!drillSrc.dateFrom || !drillSrc.dateTo" @click="callCreateDrill">Uložit</NButton>
+    <NModal v-model:show="showSoldierSelector" class="custom-card" preset="card"
+      :style="{ maxWidth: '80vw', maxHeight: '80vh' }" title="Nominace" :bordered="false" size="huge">
+      <NDataTable striped :columns="columns" :data="soldiers" :row-key="(row: RowData) => row.personalNumber"
+        :default-checked-row-keys="nominatedSoldiers" max-height="50vh" @update:checked-row-keys="handleCheck" />
       <template #action>
         <NButton @click="callCreateDrill">Potvrdit výběr</NButton>
-        <NButton
-          type="error"
-          @click="revertNominations"
-          >Zahodit změny</NButton
-        >
+        <NButton type="error" @click="revertNominations">Zahodit změny</NButton>
       </template>
     </NModal>
   </section>
@@ -104,14 +63,22 @@ import {
 import type { RowData } from "naive-ui/es/data-table/src/interface";
 import type { PropType } from "vue";
 import type { IDrill, ISoldier } from "~/types";
+import { onBeforeUnmount, ref } from 'vue'
+import { Editor, EditorContent } from '@tiptap/vue-3'
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+
+onBeforeUnmount(() => {
+  editor.value.destroy()
+})
 
 const { drill, nominated } = defineProps({
-    drill: Object as PropType<IDrill>,
-    nominated: {
-      type: Array<number>,
-      default: [],
-    },
-  }),
+  drill: Object as PropType<IDrill>,
+  nominated: {
+    type: Array<number>,
+    default: [],
+  },
+}),
   drillSrc = ref(
     drill || {
       id: null as unknown as number,
@@ -136,18 +103,18 @@ const { drill, nominated } = defineProps({
   ),
   columns = computed(() => {
     const squadFiltrOptions = soldiers.value
-        .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
-          if (!acc.some((soldier) => soldier.squad === currentValue.squad))
-            acc.push(currentValue);
-          return acc;
-        }, [])
-        .map((item) => {
-          return {
-            label: item.squad,
-            value: item.squad,
-          };
-        })
-        .sort((item1, item2) => item1.value - item2.value),
+      .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
+        if (!acc.some((soldier) => soldier.squad === currentValue.squad))
+          acc.push(currentValue);
+        return acc;
+      }, [])
+      .map((item) => {
+        return {
+          label: item.squad,
+          value: item.squad,
+        };
+      })
+      .sort((item1, item2) => item1.value - item2.value),
       platoonFiltrOptions = soldiers.value
         .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
           if (!acc.some((soldier) => soldier.platoon === currentValue.platoon))
@@ -310,7 +277,22 @@ const { drill, nominated } = defineProps({
       sortBy: "personalNumber",
       direction: "asc",
     })
-  );
+  ), editor = ref(
+    new Editor({
+      extensions: [
+        StarterKit,
+        Link.configure({
+          openOnClick: false,
+          autolink: false,
+        }),
+      ],
+      content: drillSrc.value.additionalInfo || '',
+      onUpdate({ editor }) {
+        drillSrc.value.additionalInfo = editor.getHTML()
+      },
+    })
+  )
+
 
 function handleCheck(rowKeys: DataTableRowKey[]) {
   nominatedSoldiers.value = rowKeys;
@@ -327,9 +309,8 @@ function updateDateRange() {
       year = dateSource.getFullYear(),
       month = dateSource.getMonth() + 1,
       day = dateSource.getDate();
-    return `${year}-${(month < 10 ? "0" : "") + month}-${
-      (day < 10 ? "0" : "") + day
-    }`;
+    return `${year}-${(month < 10 ? "0" : "") + month}-${(day < 10 ? "0" : "") + day
+      }`;
   });
 
   drillSrc.value.dateFrom = from;
@@ -346,9 +327,8 @@ function updateReturnDate() {
     month = dateSource.getMonth() + 1,
     day = dateSource.getDate();
 
-  drillSrc.value.returnDate = `${year}-${(month < 10 ? "0" : "") + month}-${
-    (day < 10 ? "0" : "") + day
-  }`;
+  drillSrc.value.returnDate = `${year}-${(month < 10 ? "0" : "") + month}-${(day < 10 ? "0" : "") + day
+    }`;
 }
 
 async function callCreateDrill() {
@@ -367,12 +347,54 @@ async function callCreateDrill() {
     window.alert(error);
   }
 }
+
+const toggleBold = () => {
+  editor.value.chain().focus().toggleBold().run()
+}
+const toggleItalic = () => {
+  editor.value.chain().focus().toggleItalic().run()
+}
+const toggleUnderline = () => {
+  editor.value.chain().focus().toggleUnderline().run()
+}
+const toggleBulletList = () => {
+  editor.value.chain().focus().toggleBulletList().run()
+}
 </script>
 
 <style lang="scss">
+.rich-editor {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-bottom: 1px solid #ccc;
+}
+
+.toolbar button {
+  padding: 4px 8px;
+  background: white;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.toolbar button.active {
+  background: #007bff;
+  color: white;
+}
+
+.editor-content {
+  padding: 8px;
+}
+
 .drill-new {
   .form {
     width: 500px;
+
     .input-row {
       width: 100%;
       display: grid;
