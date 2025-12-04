@@ -1,83 +1,16 @@
 <template>
     <div class="drills">
         <h1>Přehled následujících cvičení</h1>
-        <n-table :single-line="false" striped>
-            <thead>
-                <tr>
-                    <th>Název</th>
-                    <th>Od</th>
-                    <th>Do</th>
-                    <th>Datum návratu</th>
-                    <th>Počet dní</th>
-                    <th>Nominace</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="drill of drills">
-                    <td>
-                        <NuxtLink :to="'/drills/' + drill.id">
-                            {{ drill.name }}
-                        </NuxtLink>
-                    </td>
-                    <td>
-                        {{ new Date(drill.dateFrom).toLocaleDateString("cs") }}
-                    </td>
-                    <td>
-                        {{ new Date(drill.dateTo).toLocaleDateString("cs") }}
-                    </td>
-                    <td>
-                        {{
-                            new Date(drill.returnDate).toLocaleDateString("cs")
-                        }}
-                    </td>
-                    <td>
-                        {{
-                            Math.floor(
-                                (new Date(drill.dateTo) -
-                                    new Date(drill.dateFrom)) /
-                                    86400000,
-                            ) + 1
-                        }}
-                        ({{
-                            Math.floor(
-                                (new Date(drill.returnDate) -
-                                    new Date(drill.dateFrom)) /
-                                    86400000,
-                            ) + 1
-                        }})
-                    </td>
-                    <td
-                        :class="
-                            nominationsNotResponded.includes(drill.id)
-                                ? 'not-responded'
-                                : nominationsPresent.includes(drill.id)
-                                  ? 'attend'
-                                  : nominationsAbsent.includes(drill.id)
-                                    ? 'skipped'
-                                    : 'not-nominated'
-                        "
-                    >
-                        {{
-                            nominationsNotResponded.includes(drill.id)
-                                ? "Nevyjádřil jsem se"
-                                : nominationsPresent.includes(drill.id)
-                                  ? "Zúčastním se"
-                                  : nominationsAbsent.includes(drill.id)
-                                    ? "Nezúčastním se"
-                                    : "Nenominován"
-                        }}
-                    </td>
-                </tr>
-            </tbody>
-        </n-table>
+        <NDataTable :columns="columns" :data="drills" :single-line="false" striped />
     </div>
 </template>
 
 <script setup lang="ts">
-import { NTable } from "naive-ui";
-import { EAttendance, type ISoldier } from "~/types";
+import { NuxtLink } from "#components";
+import { NDataTable, type DataTableColumns } from "naive-ui";
+import { EAttendance, type IDrill, type ISoldier } from "~/types";
 const personalNumber = useState<ISoldier>("logged").value
-        .personalNumber as unknown as string,
+    .personalNumber as unknown as string,
     [drills, nominations] = await Promise.all([
         getDrills(),
         getNominations(personalNumber),
@@ -90,21 +23,95 @@ const personalNumber = useState<ISoldier>("logged").value
         .map((nomination) => nomination.drill.id),
     nominationsAbsent = nominations
         .filter((nomination) => nomination.status === EAttendance.Absent)
-        .map((nomination) => nomination.drill.id);
+        .map((nomination) => nomination.drill.id),
+    columns: DataTableColumns = [{
+        key: "name",
+        title: "Název",
+        render: (row) => h(NuxtLink, { to: '/drills/' + row.id }, () => row.name)
+    }, {
+        key: "dateFrom",
+        title: "Od",
+        sorter: "default",
+        defaultSortOrder: "descend",
+        defaultFilterOptionValues: ["future"],
+        // filterOptionValues: ['future'],  // aktivní filtr
+        filterOptions: [{
+            label: 'Budoucí',
+            value: 'future'
+        }, {
+            label: 'Minulé',
+            value: 'past'
+        }],
+        filter: (value: any, row: any) => {
+            if (value === 'future') {
+                return new Date(row.dateFrom) > new Date();
+            }
+            if (value === 'past') {
+                return new Date(row.dateFrom) <= new Date();
+            }
+            return true
+        },
+        render: (row: IDrill) => new Date(row.dateFrom).toLocaleDateString("cs")
+    }, {
+        key: "dateTo",
+        title: "Do",
+        render: (row: IDrill) => new Date(row.dateTo).toLocaleDateString("cs")
+    }, {
+        key: "name",
+        title: "Datum návratu",
+        render: (row: IDrill) => new Date(row.returnDate).toLocaleDateString("cs")
+    }, {
+        key: "dateFrom",
+        title: "Počet dní",
+        render: (row: IDrill) => {
+            return `${Math.floor(
+                (new Date(row.dateTo).getTime() -
+                    new Date(row.dateFrom).getTime()) /
+                86400000,
+            ) + 1} (${Math.floor(
+                (new Date(row.returnDate).getTime() -
+                    new Date(row.dateFrom).getTime()) /
+                86400000,
+            ) + 1})`
+        }
+    }, {
+        key: "dateTo",
+        title: "Nominace",
+        render: (row: IDrill) => nominationsNotResponded.includes(row.id)
+            ? "Nevyjádřil jsem se"
+            : nominationsPresent.includes(row.id)
+                ? "Zúčastním se"
+                : nominationsAbsent.includes(row.id)
+                    ? "Nezúčastním se"
+                    : "Nenominován",
+        cellProps(row: IDrill) {
+            return {
+                class: nominationsNotResponded.includes(row.id)
+                    ? 'not-responded'
+                    : nominationsPresent.includes(row.id)
+                        ? 'attend'
+                        : nominationsAbsent.includes(row.id)
+                            ? 'skipped'
+                            : 'not-nominated'
+            }
+        }
+    }];
 </script>
 
-<style lang="scss" scopde>
+<style lang="scss" scoped>
 .drills {
-    .attend {
-        color: green;
-    }
+    :deep() {
+        .attend {
+            color: green;
+        }
 
-    .skipped {
-        color: red;
-    }
+        .skipped {
+            color: red;
+        }
 
-    .not-responded {
-        color: grey;
+        .not-responded {
+            color: grey;
+        }
     }
 }
 </style>

@@ -1,4 +1,4 @@
-import type { INomination, ISoldier, EAttendance, IParking } from "~/types";
+import type { INomination, ISoldier, EAttendance, IParking, IDrill } from "~/types";
 
 
 // const apiBaseUrl = "http://0.0.0.0:8000/az/api/" || "https://pecaj.fun/az/api/",
@@ -204,7 +204,7 @@ export async function createDrill(
   }
 }
 
-export async function getDrills(params?: Record<string, any>) {
+export async function getDrills(params?: Record<string, any>): Promise<Array<IDrill> | undefined> {
   loadingStart();
   const query = new URLSearchParams(params);
   try {
