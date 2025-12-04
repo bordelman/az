@@ -61,7 +61,6 @@
                 v-else
                 v-model:value="soldier.medicalExaminationDue"
                 placeholder="Pracovně lékařská prohlídka do"
-                @update:value="updateReturnDate"
             />
         </div>
         <div>
