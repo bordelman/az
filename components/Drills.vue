@@ -1,13 +1,15 @@
 <template>
     <div class="drills">
         <h1>Přehled následujících cvičení</h1>
-        <NDataTable :columns="columns" :data="drills" :single-line="false" striped />
+        <NScrollbar>
+            <NDataTable :style="{maxWidth: 'calc(100vw - 32px'}" :columns="columns" :data="drills" :single-line="false" striped />
+        </NScrollbar>
     </div>
 </template>
 
 <script setup lang="ts">
 import { NuxtLink } from "#components";
-import { NDataTable, type DataTableColumns } from "naive-ui";
+import { NDataTable, NScrollbar, type DataTableColumns } from "naive-ui";
 import { EAttendance, type IDrill, type ISoldier } from "~/types";
 const personalNumber = useState<ISoldier>("logged").value
     .personalNumber as unknown as string,
@@ -27,6 +29,7 @@ const personalNumber = useState<ISoldier>("logged").value
     columns: DataTableColumns = [{
         key: "name",
         title: "Název",
+        minWidth: 200,
         render: (row) => h(NuxtLink, { to: '/drills/' + row.id }, () => row.name)
     }, {
         key: "dateFrom",
@@ -34,7 +37,6 @@ const personalNumber = useState<ISoldier>("logged").value
         sorter: "default",
         defaultSortOrder: "descend",
         defaultFilterOptionValues: ["future"],
-        // filterOptionValues: ['future'],  // aktivní filtr
         filterOptions: [{
             label: 'Budoucí',
             value: 'future'
@@ -51,18 +53,22 @@ const personalNumber = useState<ISoldier>("logged").value
             }
             return true
         },
+        width: 150,
         render: (row: IDrill) => new Date(row.dateFrom).toLocaleDateString("cs")
     }, {
         key: "dateTo",
         title: "Do",
+        width: 150,
         render: (row: IDrill) => new Date(row.dateTo).toLocaleDateString("cs")
     }, {
         key: "name",
         title: "Datum návratu",
+        width: 150,
         render: (row: IDrill) => new Date(row.returnDate).toLocaleDateString("cs")
     }, {
         key: "dateFrom",
         title: "Počet dní",
+        width: 150,
         render: (row: IDrill) => {
             return `${Math.floor(
                 (new Date(row.dateTo).getTime() -
@@ -77,6 +83,7 @@ const personalNumber = useState<ISoldier>("logged").value
     }, {
         key: "dateTo",
         title: "Nominace",
+        width: 150,
         render: (row: IDrill) => nominationsNotResponded.includes(row.id)
             ? "Nevyjádřil jsem se"
             : nominationsPresent.includes(row.id)
