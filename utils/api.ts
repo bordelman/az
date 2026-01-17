@@ -89,20 +89,23 @@ export async function changePassword(
 export async function createSoldier(soldier: Record<any, any>) {
   loadingStart();
 
-  console.log(soldier);
-
   try {
-    return await (
-      await fetch(`${apiBaseUrl}soldiers`, {
-        method: "POST",
-        body: JSON.stringify(soldier),
-        headers: {
-          Authorization: getBearerToken(),
-          "Content-Type": "application/json",
-        },
-      })
-    ).json();
+    const response = await fetch(`${apiBaseUrl}soldiers`, {
+      method: "POST",
+      body: JSON.stringify(soldier),
+      headers: {
+        Authorization: getBearerToken(),
+        "Content-Type": "application/json",
+      },
+    }),
+      result = await response.json()
+
+    if (response.ok) {
+      return result
+    }
+    throw new Error(result.message)
   } catch (error) {
+    window.alert(error.message)
     console.log(error);
   } finally {
     loadingEnd();
@@ -182,13 +185,13 @@ export async function createDrill(
   loadingStart();
   try {
     const response = await fetch(apiBaseUrl + "drills", {
-        method: "POST",
-        body: JSON.stringify(drill),
-        headers: {
-          Authorization: getBearerToken(),
-          "Content-Type": "application/json",
-        },
-      }),
+      method: "POST",
+      body: JSON.stringify(drill),
+      headers: {
+        Authorization: getBearerToken(),
+        "Content-Type": "application/json",
+      },
+    }),
       { message, id } = await response.json();
 
     if (!response.ok) {

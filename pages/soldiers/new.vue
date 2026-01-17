@@ -2,19 +2,11 @@
     <section class="soldier">
         <div>
             Osobní číslo:
-            <NInputNumber
-                v-model:value="soldier.personalNumber"
-                :show-button="false"
-                placeholder="Osobní číslo"
-            />
+            <NInputNumber v-model:value="soldier.personalNumber" :show-button="false" placeholder="Osobní číslo" />
         </div>
         <div>
             Hodnost:
-            <NSelect
-                v-model:value="soldier.rank"
-                :options="rankOptions"
-                placeholder="Hodnost"
-            />
+            <NSelect v-model:value="soldier.rank" :options="rankOptions" placeholder="Hodnost" />
         </div>
         <div>
             Titul před jménem:
@@ -22,10 +14,7 @@
         </div>
         <div>
             Křestní jméno:
-            <NInput
-                v-model:value="soldier.firstname"
-                placeholder="Křestní jméno"
-            />
+            <NInput v-model:value="soldier.firstname" placeholder="Křestní jméno" />
         </div>
         <div>
             Příjmení:
@@ -37,18 +26,12 @@
         </div>
         <div>
             Pracovně lékařská prohlídka do:
-            <NDatePicker
-                v-model:value="soldier.medicalExaminationDue"
-                placeholder="Pracovně lékařská prohlídka do"
-            />
+            <NDatePicker v-model:value="soldier.medicalExaminationDue" placeholder="Pracovně lékařská prohlídka do" />
         </div>
         <div>
             Zdravotní klasifikace:
-            <NSelect
-                v-model:value="soldier.medicalClasification"
-                :options="medicalClasificationOptions"
-                placeholder="Zdravotní klasifikace"
-            />
+            <NSelect v-model:value="soldier.medicalClasification" :options="medicalClasificationOptions"
+                placeholder="Zdravotní klasifikace" />
         </div>
         <div>
             Email:
@@ -56,43 +39,23 @@
         </div>
         <div>
             Mobil:
-            <NInput
-                type="tel"
-                v-model:value="soldier.mobile"
-                placeholder="Mobil"
-            />
+            <NInput type="tel" v-model:value="soldier.mobile" placeholder="Mobil" />
         </div>
         <div>
             Pozice:
-            <NSelect
-                v-model:value="soldier.position"
-                :options="positionOptions"
-                placeholder="Pozice"
-            />
+            <NSelect v-model:value="soldier.position" :options="positionOptions" placeholder="Pozice" />
         </div>
         <div>
             Rota:
-            <NSelect
-                v-model:value="soldier.company"
-                :options="companyOptions"
-                placeholder="Rota"
-            />
+            <NSelect v-model:value="soldier.company" :options="companyOptions" placeholder="Rota" />
         </div>
         <div>
             Četa:
-            <NSelect
-                v-model:value="soldier.platoon"
-                :options="platoonOptions"
-                placeholder="Četa"
-            />
+            <NSelect v-model:value="soldier.platoon" :options="platoonOptions" placeholder="Četa" />
         </div>
         <div>
             Družstvo:
-            <NSelect
-                v-model:value="soldier.squad"
-                :options="squadOptions"
-                placeholder="Družstvo"
-            />
+            <NSelect v-model:value="soldier.squad" :options="squadOptions" placeholder="Družstvo" />
         </div>
         <NButton @click="callCreateSoldier">Uložit</NButton>
     </section>
@@ -102,11 +65,7 @@
 import { NButton, NDatePicker, NInput, NInputNumber, NSelect } from "naive-ui";
 import type { ISoldier } from "~/types";
 
-const soldier: ISoldier = reactive({
-        position: 1,
-        rank: 1,
-        company: 1,
-    }),
+const soldier: ISoldier = reactive({}),
     { positions, ranks } = useSettings(),
     positionOptions = Object.values(positions.value).map((position) => {
         return {
@@ -139,27 +98,36 @@ const soldier: ISoldier = reactive({
     ];
 
 async function callCreateSoldier() {
-    if (!soldier.platoon) soldier.platoon = null;
-    if (!soldier.squad) soldier.squad = null;
+    if (!soldier.platoon) delete soldier.platoon;
+    if (!soldier.squad) delete soldier.squad;
     soldier.medicalExaminationDue = parseDate(soldier.medicalExaminationDue);
-    const soldierCreated = await createSoldier(soldier);
 
-    useRouter().replace("/soldiers/" + soldierCreated.personalNumber);
+    try {
+        const soldierCreated = await createSoldier(soldier);
+
+        useRouter().replace("/soldiers/" + soldierCreated.personalNumber);
+    } catch (error) {
+        console.log("soldier not created");
+    }
+
 }
 
 function parseDate(date: Date) {
-    const dateSource = new Date(date),
-        year = dateSource.getFullYear(),
-        month = dateSource.getMonth() + 1,
-        day = dateSource.getDate();
+    if (date) {
+        const dateSource = new Date(date),
+            year = dateSource.getFullYear(),
+            month = dateSource.getMonth() + 1,
+            day = dateSource.getDate();
 
-    return `${year}-${(month < 10 ? "0" : "") + month}-${(day < 10 ? "0" : "") + day}`;
+        return `${year}-${(month < 10 ? "0" : "") + month}-${(day < 10 ? "0" : "") + day}`;
+    }
+
 }
 </script>
 
 <style lang="scss" scoped>
 .soldier {
-    > div {
+    >div {
         display: grid;
         grid-template-columns: 250px 200px;
     }
