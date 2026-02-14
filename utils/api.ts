@@ -10,6 +10,10 @@ const apiBaseUrl = "https://pecaj.fun/az/api/",
 
 export async function logIn(login: string, password: string) {
   loadingStart();
+  const tokenCookie = useCookie('army_access_token', {
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7 // příklad: 1 týden
+  });
 
   try {
     const response = await fetch(`${apiBaseUrl}auth/login`, {
@@ -19,10 +23,10 @@ export async function logIn(login: string, password: string) {
       },
       body: JSON.stringify({ login, password }),
     });
-    if (response.status === 200) {
+    if (response.ok) {
       const result = await response.json();
 
-      document.cookie = `army_access_token=${result.accessToken};path=/`;
+      tokenCookie.value = result.accessToken;
       useState("logged").value = result;
     } else {
       throw new Error((await response.json()).message);
@@ -36,6 +40,10 @@ export async function logIn(login: string, password: string) {
 
 export async function autoLogIn() {
   loadingStart();
+  const tokenCookie = useCookie('army_access_token', {
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7 // příklad: 1 týden
+  });
 
   try {
     const response = await fetch(`${apiBaseUrl}auth/auto-login`, {
@@ -43,10 +51,10 @@ export async function autoLogIn() {
         Authorization: getBearerToken(),
       },
     });
-    if (response.status === 200) {
+    if (response.ok) {
       const result = await response.json();
 
-      document.cookie = `army_access_token=${result.accessToken};path=/`;
+      tokenCookie.value = result.accessToken;
       useState("logged").value = result;
     }
   } catch (error) {
