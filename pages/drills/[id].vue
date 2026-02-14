@@ -36,7 +36,6 @@
         <div>
             <NButton v-if="logged.position.id === 69010" @click="toggleSquadFilter">{{ showSquad ? "Zobrazit všechny" :
                 "Zobrazit pouze vlastní družstvo" }}</NButton>
-            <pre>{{ showSquad }}</pre>
         </div>
         <section class="lists">
             <section class="attendents">
