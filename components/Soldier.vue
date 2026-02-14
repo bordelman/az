@@ -423,13 +423,14 @@ onMounted(async () => {
                 getNominations(pNum),
             ]);
 
-            if(logged.value.personalNumber === 3757666) {
+        if (logged.value.personalNumber === 3757666) {
 
-            window.alert("personal number: " + pNum)
-            window.alert(JSON.stringify(soldiersArr[0]))
-            window.alert(nominations)
-            window.alert(JSON.stringify(nominations))
-            }
+            window.alert("Number: " + pNum)
+            window.alert(`soldier: ${soldiersArr}`)
+            window.alert(`soldier parsed: ${JSON.stringify(soldiersArr)}`)
+            window.alert("nominations " + nominations)
+            window.alert("nominations parsed: " + JSON.stringify(nominations))
+        }
 
         soldier.value = (soldiersArr || [])[0];
         nominationsNotResponded.value = (nominations || []).filter(

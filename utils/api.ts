@@ -401,12 +401,9 @@ export async function getPositions() {
 }
 
 function getBearerToken() {
-  return (
-    "Bearer " +
-    document.cookie
-      .split(";")
-      .find((cookie) => cookie.includes("army_access_token"))
-      ?.trim()
-      .replace("army_access_token=", "")
-  );
+  const token = useCookie("army_access_token").value;
+  if (!token) {
+    window.alert("Nebyl nalezen token");
+  }
+  return "Bearer " + token;
 }
