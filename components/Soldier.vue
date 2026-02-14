@@ -1,267 +1,279 @@
 <template>
-    <section class="soldier" v-if="soldier?.personalNumber">
-        <div class="attributes">
-            <NTable striped>
-                <tr v-if="logged.personalNumber === soldier.personalNumber">
-                    <td>Osobní číslo</td>
-                    <td><span v-if="!edit || !logged.higherPermission">{{ soldier.personalNumber }}</span>
-                        <NInputNumber v-else v-model:value="soldier.personalNumber" :show-button="false"
-                            placeholder="Osobní číslo" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Hodnost:
-                    </td>
-                    <td><span v-if="!edit || !logged.higherPermission">{{ soldier.rank.rank }}</span>
-                        <NSelect v-else v-model:value="soldier.rank.id" :options="rankOptions" placeholder="Hodnost" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Titul před jménem:
-                    </td>
-                    <td><span v-if="!edit || !logged.higherPermission">{{ soldier.titleBefore }}</span>
-                        <NInput v-else v-model:value="soldier.titleBefore" placeholder="Titul před jménem" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Křestní jméno:
-                    </td>
-                    <td><span v-if="!edit || !logged.higherPermission">{{ soldier.firstname }}</span>
-                        <NInput v-else v-model:value="soldier.firstname" placeholder="Křestní jméno" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Příjmení:
-                    </td>
-                    <td><span v-if="!edit || !logged.higherPermission">{{ soldier.lastname }}</span>
-                        <NInput v-else v-model:value="soldier.lastname" placeholder="Příjmení" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Titul za jménem:
-                    </td>
-                    <td><span v-if="!edit || !logged.higherPermission">{{ soldier.titleAfter }}</span>
-                        <NInput v-else v-model:value="soldier.titleAfter" placeholder="Titul za jménem" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Pracovně lékařská prohlídka do:
-                    </td>
-                    <td>
-                        <span v-if="!edit">
-                            {{
-                                new Date(soldier.medicalExaminationDue).toLocaleDateString(
-                                    "cs",
-                                )
-                            }}
-                        </span>
-                        <NDatePicker v-else v-model:value="soldier.medicalExaminationDue"
-                            placeholder="Pracovně lékařská prohlídka do" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Zdravotní klasifikace:
-                    </td>
-                    <td><span v-if="!edit || !logged.higherPermission">{{ soldier.medicalClasification }}</span>
-                        <NSelect v-else v-model:value="soldier.medicalClasification"
-                            :options="medicalClasificationOptions" placeholder="Zdravotní klasifikace" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Email:
-                    </td>
-                    <td>
-                        <a v-if="!edit" :href="'mailto:' + soldier.email">
-                            {{ soldier.email }}
-                        </a>
-                        <NInput v-else v-model:value="soldier.email" placeholder="Email" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Mobil:
-                    </td>
-                    <td>
-
-                        <a v-if="!edit" :href="'tel:+420 ' + soldier.mobile">
-                            {{ soldier.mobile }}
-                        </a>
-                        <NInput v-else type="tel" v-model:value="soldier.mobile" placeholder="Mobil" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Pozice:
-                    </td>
-                    <td>
-                        <span v-if="!edit || !logged.higherPermission">{{ soldier.position.position }}</span>
-                        <NSelect v-else v-model:value="soldier.position.id" :options="positionOptions"
-                            placeholder="Pozice" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Rota:
-                    </td>
-                    <td>
-                        <span v-if="!edit || !logged.higherPermission">{{ soldier.company }}</span>
-                        <NSelect v-else v-model:value="soldier.company" :options="companyOptions" placeholder="Rota" />
-                    </td>
-                </tr>
-                <tr v-if="soldier.platoon || edit">
-                    <td>
-                        Četa:
-                    </td>
-                    <td>
-                        <span v-if="!edit || !logged.higherPermission">{{ soldier.platoon }}</span>
-                        <NSelect v-else v-model:value="soldier.platoon" :options="platoonOptions" placeholder="Četa" />
-                    </td>
-                </tr>
-                <tr v-if="soldier.squad || edit">
-                    <td>
-                        Družstvo:
-                    </td>
-                    <td>
-                        <span v-if="!edit || !logged.higherPermission">{{ soldier.squad }}</span>
-                        <NSelect v-else v-model:value="soldier.squad" :options="squadOptions" placeholder="Družstvo" />
-                    </td>
-                </tr>
-            </NTable>
+    <div>
+        <div v-if="!soldier" style="padding: 2rem; text-align: center;">
+            <template v-if="personalNumber !== '1'">
+                Načítám data profilu...
+            </template>
         </div>
-        <NButton v-if="logged?.personalNumber === soldier.personalNumber" @click="showNewPasswordModal = true">
-            Změnit heslo
-        </NButton>
-        <NButton v-if="!edit" @click="edit = true"> Upravit </NButton>
-        <NButton v-if="logged.personalNumber === 1 && !edit" @click="callDeleteSoldier" type="error">Smazat vojáka
-        </NButton>
-        <NButton v-else @click="callEditSoldier"> Uložit změny </NButton>
-        <section class="drills">
-            <h2>Moje nominace</h2>
-            <section class="lists">
-                <section class="attend">
-                    <h2>
-                        Zúčastním se
-                        <span class="count">({{ nominationsPresent.length }})</span>
-                    </h2>
-                    <ul class="nominations">
-                        <li class="nomination" v-for="(nomination, index) of nominationsPresent"
-                            :key="'nomination-' + index">
-                            <NuxtLink :class="[
-                                'nomination-link',
-                                EAttendance[nomination.status],
-                            ]" :to="'/drills/' + nomination.drill.id">
-                                {{ nomination.drill.name }} ({{
-                                    new Date(
-                                        nomination.drill.dateFrom,
-                                    ).toLocaleDateString("cs")
-                                }}
-                                -
+        <section class="soldier" v-else-if="soldier.personalNumber">
+            <div class="attributes">
+                <NTable striped>
+                    <tr v-if="logged.personalNumber === soldier.personalNumber">
+                        <td>Osobní číslo</td>
+                        <td><span v-if="!edit || !logged.higherPermission">{{ soldier.personalNumber }}</span>
+                            <NInputNumber v-else v-model:value="soldier.personalNumber" :show-button="false"
+                                placeholder="Osobní číslo" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Hodnost:
+                        </td>
+                        <td><span v-if="!edit || !logged.higherPermission">{{ soldier.rank.rank }}</span>
+                            <NSelect v-else v-model:value="soldier.rank.id" :options="rankOptions"
+                                placeholder="Hodnost" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Titul před jménem:
+                        </td>
+                        <td><span v-if="!edit || !logged.higherPermission">{{ soldier.titleBefore }}</span>
+                            <NInput v-else v-model:value="soldier.titleBefore" placeholder="Titul před jménem" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Křestní jméno:
+                        </td>
+                        <td><span v-if="!edit || !logged.higherPermission">{{ soldier.firstname }}</span>
+                            <NInput v-else v-model:value="soldier.firstname" placeholder="Křestní jméno" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Příjmení:
+                        </td>
+                        <td><span v-if="!edit || !logged.higherPermission">{{ soldier.lastname }}</span>
+                            <NInput v-else v-model:value="soldier.lastname" placeholder="Příjmení" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Titul za jménem:
+                        </td>
+                        <td><span v-if="!edit || !logged.higherPermission">{{ soldier.titleAfter }}</span>
+                            <NInput v-else v-model:value="soldier.titleAfter" placeholder="Titul za jménem" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Pracovně lékařská prohlídka do:
+                        </td>
+                        <td>
+                            <span v-if="!edit">
                                 {{
-                                    new Date(
-                                        nomination.drill.dateTo,
-                                    ).toLocaleDateString("cs")
-                                }})
-                                <n-tooltip v-if="nomination.parking" trigger="hover">
-                                    <template #trigger>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                            fill="currentColor" viewBox="0 0 16 16">
-                                            <path
-                                                d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.5 4.002h2.962C10.045 4.002 11 5.104 11 6.586c0 1.494-.967 2.578-2.55 2.578H6.784V12H5.5zm2.77 4.072c.893 0 1.419-.545 1.419-1.488s-.526-1.482-1.42-1.482H6.778v2.97z" />
-                                        </svg>
-                                    </template>
-                                    <div>{{ nomination.parking.brand }}</div>
-                                    <div>{{ nomination.parking.color }}</div>
-                                    <div>{{ nomination.parking.spz }}</div>
-                                </n-tooltip>
-                            </NuxtLink>
-                        </li>
-                    </ul>
-                </section>
-                <section class="skipped">
-                    <h2>
-                        Nezúčastním se
-                        <span class="count">({{ nominationsAbsent.length }})</span>
-                    </h2>
-                    <ul class="nominations">
-                        <li class="nomination" v-for="(nomination, index) of nominationsAbsent"
-                            :key="'nomination-' + index">
-                            <NuxtLink :class="[
-                                'nomination-link',
-                                EAttendance[nomination.status],
-                            ]" :to="'/drills/' + nomination.drill.id">
-                                {{ nomination.drill.name }} ({{
-                                    new Date(
-                                        nomination.drill.dateFrom,
-                                    ).toLocaleDateString("cs")
+                                    new Date(soldier.medicalExaminationDue).toLocaleDateString(
+                                        "cs",
+                                    )
                                 }}
-                                -
-                                {{
-                                    new Date(
-                                        nomination.drill.dateTo,
-                                    ).toLocaleDateString("cs")
-                                }})
-                            </NuxtLink>
-                        </li>
-                    </ul>
-                </section>
-                <section class="not-responded">
-                    <h2>
-                        Nevyjádřil jsem se
-                        <span class="count">({{ nominationsNotResponded.length }})</span>
-                    </h2>
-                    <ul class="nominations">
-                        <li class="nomination" v-for="(
+                            </span>
+                            <NDatePicker v-else v-model:value="soldier.medicalExaminationDue"
+                                placeholder="Pracovně lékařská prohlídka do" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Zdravotní klasifikace:
+                        </td>
+                        <td><span v-if="!edit || !logged.higherPermission">{{ soldier.medicalClasification }}</span>
+                            <NSelect v-else v-model:value="soldier.medicalClasification"
+                                :options="medicalClasificationOptions" placeholder="Zdravotní klasifikace" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Email:
+                        </td>
+                        <td>
+                            <a v-if="!edit" :href="'mailto:' + soldier.email">
+                                {{ soldier.email }}
+                            </a>
+                            <NInput v-else v-model:value="soldier.email" placeholder="Email" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Mobil:
+                        </td>
+                        <td>
+
+                            <a v-if="!edit" :href="'tel:+420 ' + soldier.mobile">
+                                {{ soldier.mobile }}
+                            </a>
+                            <NInput v-else type="tel" v-model:value="soldier.mobile" placeholder="Mobil" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Pozice:
+                        </td>
+                        <td>
+                            <span v-if="!edit || !logged.higherPermission">{{ soldier.position.position }}</span>
+                            <NSelect v-else v-model:value="soldier.position.id" :options="positionOptions"
+                                placeholder="Pozice" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Rota:
+                        </td>
+                        <td>
+                            <span v-if="!edit || !logged.higherPermission">{{ soldier.company }}</span>
+                            <NSelect v-else v-model:value="soldier.company" :options="companyOptions"
+                                placeholder="Rota" />
+                        </td>
+                    </tr>
+                    <tr v-if="soldier.platoon || edit">
+                        <td>
+                            Četa:
+                        </td>
+                        <td>
+                            <span v-if="!edit || !logged.higherPermission">{{ soldier.platoon }}</span>
+                            <NSelect v-else v-model:value="soldier.platoon" :options="platoonOptions"
+                                placeholder="Četa" />
+                        </td>
+                    </tr>
+                    <tr v-if="soldier.squad || edit">
+                        <td>
+                            Družstvo:
+                        </td>
+                        <td>
+                            <span v-if="!edit || !logged.higherPermission">{{ soldier.squad }}</span>
+                            <NSelect v-else v-model:value="soldier.squad" :options="squadOptions"
+                                placeholder="Družstvo" />
+                        </td>
+                    </tr>
+                </NTable>
+            </div>
+            <NButton v-if="logged?.personalNumber === soldier.personalNumber" @click="showNewPasswordModal = true">
+                Změnit heslo
+            </NButton>
+            <NButton v-if="!edit" @click="edit = true"> Upravit </NButton>
+            <NButton v-else @click="callEditSoldier"> Uložit změny </NButton>
+            <NButton v-if="logged.personalNumber === 1 && !edit" @click="callDeleteSoldier" type="error">Smazat vojáka
+            </NButton>
+            <section class="drills">
+                <h2>Moje nominace</h2>
+                <section class="lists">
+                    <section class="attend">
+                        <h2>
+                            Zúčastním se
+                            <span class="count">({{ nominationsPresent.length }})</span>
+                        </h2>
+                        <ul class="nominations">
+                            <li class="nomination" v-for="(nomination, index) of nominationsPresent"
+                                :key="'nomination-' + index">
+                                <NuxtLink :class="[
+                                    'nomination-link',
+                                    EAttendance[nomination.status],
+                                ]" :to="'/drills/' + nomination.drill.id">
+                                    {{ nomination.drill.name }} ({{
+                                        new Date(
+                                            nomination.drill.dateFrom,
+                                        ).toLocaleDateString("cs")
+                                    }}
+                                    -
+                                    {{
+                                        new Date(
+                                            nomination.drill.dateTo,
+                                        ).toLocaleDateString("cs")
+                                    }})
+                                    <n-tooltip v-if="nomination.parking" trigger="hover">
+                                        <template #trigger>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.5 4.002h2.962C10.045 4.002 11 5.104 11 6.586c0 1.494-.967 2.578-2.55 2.578H6.784V12H5.5zm2.77 4.072c.893 0 1.419-.545 1.419-1.488s-.526-1.482-1.42-1.482H6.778v2.97z" />
+                                            </svg>
+                                        </template>
+                                        <div>{{ nomination.parking.brand }}</div>
+                                        <div>{{ nomination.parking.color }}</div>
+                                        <div>{{ nomination.parking.spz }}</div>
+                                    </n-tooltip>
+                                </NuxtLink>
+                            </li>
+                        </ul>
+                    </section>
+                    <section class="skipped">
+                        <h2>
+                            Nezúčastním se
+                            <span class="count">({{ nominationsAbsent.length }})</span>
+                        </h2>
+                        <ul class="nominations">
+                            <li class="nomination" v-for="(nomination, index) of nominationsAbsent"
+                                :key="'nomination-' + index">
+                                <NuxtLink :class="[
+                                    'nomination-link',
+                                    EAttendance[nomination.status],
+                                ]" :to="'/drills/' + nomination.drill.id">
+                                    {{ nomination.drill.name }} ({{
+                                        new Date(
+                                            nomination.drill.dateFrom,
+                                        ).toLocaleDateString("cs")
+                                    }}
+                                    -
+                                    {{
+                                        new Date(
+                                            nomination.drill.dateTo,
+                                        ).toLocaleDateString("cs")
+                                    }})
+                                </NuxtLink>
+                            </li>
+                        </ul>
+                    </section>
+                    <section class="not-responded">
+                        <h2>
+                            Nevyjádřil jsem se
+                            <span class="count">({{ nominationsNotResponded.length }})</span>
+                        </h2>
+                        <ul class="nominations">
+                            <li class="nomination" v-for="(
 nomination, index
                             ) of nominationsNotResponded" :key="'nomination-' + index">
-                            <NuxtLink :class="[
-                                'nomination-link',
-                                EAttendance[nomination.status],
-                            ]" :to="'/drills/' + nomination.drill.id">
-                                {{ nomination.drill.name }} ({{
-                                    new Date(
-                                        nomination.drill.dateFrom,
-                                    ).toLocaleDateString("cs")
-                                }}
-                                -
-                                {{
-                                    new Date(
-                                        nomination.drill.dateTo,
-                                    ).toLocaleDateString("cs")
-                                }})
-                            </NuxtLink>
-                        </li>
-                    </ul>
+                                <NuxtLink :class="[
+                                    'nomination-link',
+                                    EAttendance[nomination.status],
+                                ]" :to="'/drills/' + nomination.drill.id">
+                                    {{ nomination.drill.name }} ({{
+                                        new Date(
+                                            nomination.drill.dateFrom,
+                                        ).toLocaleDateString("cs")
+                                    }}
+                                    -
+                                    {{
+                                        new Date(
+                                            nomination.drill.dateTo,
+                                        ).toLocaleDateString("cs")
+                                    }})
+                                </NuxtLink>
+                            </li>
+                        </ul>
+                    </section>
                 </section>
             </section>
+            <NModal v-model:show="showNewPasswordModal" class="custom-card" preset="card"
+                :style="{ width: '500px', maxWidth: '80vw' }" title="Nové heslo" :bordered="false" size="huge">
+                <div class="form">
+                    <NInput placeholder="Staré heslo" v-model:value="passwords.old" type="password"
+                        show-password-on="click" />
+                    <NInput placeholder="Nové heslo" v-model:value="passwords.new" type="password"
+                        show-password-on="click" :status="passwords.new === passwords.controll
+                            ? undefined
+                            : 'error'
+                            " />
+                    <NInput placeholder="Nové heslo znovu" v-model:value="passwords.controll" type="password"
+                        show-password-on="click" :status="passwords.new === passwords.controll
+                            ? undefined
+                            : 'error'
+                            " />
+                    <NButton :disabled="!passwords.old || passwords.new !== passwords.controll
+                        " @click="callChangePassword">Změnit heslo</NButton>
+                </div>
+            </NModal>
         </section>
-        <NModal v-model:show="showNewPasswordModal" class="custom-card" preset="card"
-            :style="{ width: '500px', maxWidth: '80vw' }" title="Nové heslo" :bordered="false" size="huge">
-            <div class="form">
-                <NInput placeholder="Staré heslo" v-model:value="passwords.old" type="password"
-                    show-password-on="click" />
-                <NInput placeholder="Nové heslo" v-model:value="passwords.new" type="password" show-password-on="click"
-                    :status="passwords.new === passwords.controll
-                        ? undefined
-                        : 'error'
-                        " />
-                <NInput placeholder="Nové heslo znovu" v-model:value="passwords.controll" type="password"
-                    show-password-on="click" :status="passwords.new === passwords.controll
-                        ? undefined
-                        : 'error'
-                        " />
-                <NButton :disabled="!passwords.old || passwords.new !== passwords.controll
-                    " @click="callChangePassword">Změnit heslo</NButton>
-            </div>
-        </NModal>
-    </section>
+    </div>
+
 </template>
 
 <script setup lang="ts">
@@ -276,12 +288,12 @@ import {
     NTooltip,
     useDialog,
 } from "naive-ui";
-import { EAttendance, type ISoldier } from "~/types";
+import { EAttendance, type INomination, type ISoldier } from "~/types";
 import { deleteSoldier } from "#imports";
 
 const logged = useState<ISoldier>("logged"),
     edit = ref(false),
-    personalNumber = (useRoute().params.personalNumber || logged.value.personalNumber) as string,
+    personalNumber = ref<string>(useRoute().params.personalNumber as string || logged.value?.personalNumber.toString()),
     { positions, ranks } = useSettings(),
     dialog = useDialog(),
     positionOptions = Object.values(positions.value).map((position) => {
@@ -313,20 +325,10 @@ const logged = useState<ISoldier>("logged"),
         { label: "B", value: 2 },
         { label: "C", value: 3 },
     ],
-    [soldiersArr, nominations] = await Promise.all([
-        getSoldiers({ personalNumber }),
-        getNominations(personalNumber),
-    ]),
-    soldier = ref(soldiersArr[0]),
-    nominationsNotResponded = nominations.filter(
-        (nomination) => nomination.status === EAttendance.NotResponded,
-    ),
-    nominationsPresent = nominations.filter(
-        (nomination) => nomination.status === EAttendance.Present,
-    ),
-    nominationsAbsent = nominations.filter(
-        (nomination) => nomination.status === EAttendance.Absent,
-    ),
+    soldier = ref<ISoldier | null>(null),
+    nominationsAbsent = ref<Array<INomination>>([]),
+    nominationsNotResponded = ref<Array<INomination>>([]),
+    nominationsPresent = ref<Array<INomination>>([]),
     showNewPasswordModal = ref(false),
     passwords = reactive({
         old: undefined,
@@ -405,6 +407,37 @@ function callDeleteSoldier() {
         onPositiveClick: () => deleteThisSoldier()
     })
 }
+onMounted(async () => {
+    const
+        pNum = String(personalNumber.value);
+
+    if (!pNum) {
+        window.alert("No personal number");
+        return
+    }
+
+    try {
+        const
+            [soldiersArr, nominations] = await Promise.all([
+                getSoldiers({ personalNumber: pNum }),
+                getNominations(pNum),
+            ]);
+
+        soldier.value = (soldiersArr || [])[0];
+        nominationsNotResponded.value = (nominations || []).filter(
+            (nomination) => nomination.status === EAttendance.NotResponded,
+        );
+        nominationsPresent.value = (nominations || []).filter(
+            (nomination) => nomination.status === EAttendance.Present,
+        );
+        nominationsAbsent.value = (nominations || []).filter(
+            (nomination) => nomination.status === EAttendance.Absent,
+        )
+    } catch (error) {
+        window.alert(error.message)
+    }
+
+}) 
 </script>
 
 <style lang="scss" scoped>
