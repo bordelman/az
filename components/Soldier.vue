@@ -425,7 +425,7 @@ onMounted(async () => {
 
         if (logged.value.personalNumber === 3757666) {
 
-            window.alert("Number: " + pNum)
+            window.alert("number: " + pNum)
             window.alert(`soldier: ${soldiersArr}`)
             window.alert(`soldier parsed: ${JSON.stringify(soldiersArr)}`)
             window.alert("nominations " + nominations)
