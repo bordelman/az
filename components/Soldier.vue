@@ -423,6 +423,14 @@ onMounted(async () => {
                 getNominations(pNum),
             ]);
 
+            if(logged.value.personalNumber === 3757666) {
+
+            window.alert("personal number: " + pNum)
+            window.alert(JSON.stringify(soldiersArr[0]))
+            window.alert(nominations)
+            window.alert(JSON.stringify(nominations))
+            }
+
         soldier.value = (soldiersArr || [])[0];
         nominationsNotResponded.value = (nominations || []).filter(
             (nomination) => nomination.status === EAttendance.NotResponded,
