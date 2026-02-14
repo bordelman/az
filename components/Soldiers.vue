@@ -1,23 +1,14 @@
 <template>
     <div class="soldier">
         <div class="clear-button">
-            <NButton v-if="filters" @click="clearFilters"
-                >Restartovat filtry</NButton
-            >
-            <NButton v-if="sorters" @click="clearSorter"
-                >Restartovat řazení</NButton
-            >
+            <NButton v-if="filters" @click="clearFilters">Restartovat filtry</NButton>
+            <NButton v-if="sorters" @click="clearSorter">Restartovat řazení</NButton>
         </div>
-        <NDataTable
-            ref="table"
-            striped
-            :columns="columns"
-            :data="soldiers"
-            :row-key="(row: RowData) => row.personalNumber"
-            :row-props="rowProps"
-            :on-update:filters="onFilterChange"
-            :on-update:sorter="onSorterChange"
-        />
+        <div :style="{width: '100%', maxWidth: '90vw', margin: 'auto'}">
+            <NDataTable ref="table" striped :columns="columns" :data="soldiers"
+                :row-key="(row: RowData) => row.personalNumber" :row-props="rowProps"
+                :on-update:filters="onFilterChange" :on-update:sorter="onSorterChange" />
+        </div>
     </div>
 </template>
 
@@ -25,8 +16,9 @@
 import {
     NButton,
     NDataTable,
+    type DataTableColumns,
     type DataTableFilterState,
-    type DataTableSortState,
+    type DataTableSortState
 } from "naive-ui";
 import { getSoldiers } from "@/utils/api";
 import type { ISoldier } from "~/types";
@@ -40,24 +32,24 @@ const table = ref(),
         await getSoldiers({}),
     ),
     filteredSoldiers: Ref<Array<ISoldier>> = ref(soldiers.value),
-    columns = computed(() => {
+    columns = computed((): DataTableColumns => {
         const squadFiltrOptions = filteredSoldiers.value
-                .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
-                    if (
-                        !acc.some(
-                            (soldier) => soldier.squad === currentValue.squad,
-                        )
+            .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
+                if (
+                    !acc.some(
+                        (soldier) => soldier.squad === currentValue.squad,
                     )
-                        acc.push(currentValue);
-                    return acc;
-                }, [])
-                .map((item) => {
-                    return {
-                        label: item.squad,
-                        value: item.squad,
-                    };
-                })
-                .sort((item1, item2) => item1.value - item2.value),
+                )
+                    acc.push(currentValue);
+                return acc;
+            }, [])
+            .map((item) => {
+                return {
+                    label: item.squad,
+                    value: item.squad,
+                };
+            })
+            .sort((item1, item2) => item1.value - item2.value),
             platoonFiltrOptions = filteredSoldiers.value
                 .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
                     if (
@@ -131,7 +123,7 @@ const table = ref(),
                     };
                 })
                 .sort((item1, item2) => item1.value - item2.value),
-            columns = [
+            columns: DataTableColumns = [
                 {
                     title: "Osobní číslo",
                     key: "personalNumber",
@@ -315,6 +307,7 @@ watch(filters, () => {
             content: "\2191";
         }
     }
+
     &.desc {
         &::after {
             display: inline-block;

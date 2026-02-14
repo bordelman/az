@@ -3,41 +3,32 @@
     <NuxtLink to="/">
       <div class="logo" />
     </NuxtLink>
-    <div
-      class="center"
-      v-if="logged"
-    >
+    <div class="center" v-if="logged">
       <div class="top">
+        <NuxtLink v-if="logged.personalNumber !== 1" to="/">Můj profil</NuxtLink>
         <NuxtLink to="/soldiers">Přehled vojáků</NuxtLink>
-        <NuxtLink
-          v-if="logged.higherPermission"
-          to="/soldiers/new"
-        >
+        <NuxtLink v-if="logged.higherPermission" to="/soldiers/new">
           Založit vojáka
         </NuxtLink>
         <NuxtLink to="/drills">Přehled cvičení</NuxtLink>
-        <NuxtLink
-          v-if="logged.higherPermission"
-          to="/drills/new"
-        >
+        <NuxtLink v-if="logged.higherPermission" to="/drills/new">
           Založit cvičení
         </NuxtLink>
       </div>
       <div class="bottom">
-        <div class="logged-soldier">
+        <div v-if="logged.personalNumber !== 1" class="logged-soldier">
           {{ logged.rank.abbreviation }}. {{ logged.firstname }}
           {{ logged.lastname }}, {{ logged.position.position }} ({{
             logged.company
           }}/{{ logged.platoon || "_" }}/{{ logged.squad || "_" }})
         </div>
+        <div v-else>
+          Admin
+        </div>
       </div>
     </div>
 
-    <NButton
-      class="log-out"
-      v-if="logged"
-      @click="logOut"
-    >
+    <NButton class="log-out" v-if="logged" @click="logOut">
       Odhlásit
     </NButton>
   </section>
@@ -79,7 +70,11 @@ function logOut() {
 
     .top {
       display: flex;
-      gap: 16px;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      column-gap: 16px;
+      row-gap: 8px;
     }
   }
 

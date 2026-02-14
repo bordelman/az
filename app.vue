@@ -1,45 +1,38 @@
 <template>
     <n-spin v-if="loaded" :show="isLoading">
         <NConfigProvider :locale="customizedLocale" :date-locale="dateCsCZ">
-            <n-modal-provider>
-                <section class="layout">
-                    <LayoutHeader />
-                    <template v-if="logged">
-                        <NuxtPage class="content" />
-                        <LayoutFooter />
-                    </template>
-                    <template v-else>
-                        <form v-show="!isLoading" class="login-form">
-                            <div class="row">
-                                <n-input
-                                    v-model:value="login"
-                                    placeholder="Login (e-mail nebo osobní číslo)"
-                                />
-                            </div>
-                            <div class="row">
-                                <n-input
-                                    v-model:value="password"
-                                    type="password"
-                                    show-password-on="mousedown"
-                                    placeholder="Heslo"
-                                />
-                            </div>
-                            <NButton
-                                :disabled="!password || !login"
-                                @click="logIn(login, password)"
-                            >
-                                Přihlásit
-                            </NButton>
-                        </form>
-                    </template>
-                </section>
-            </n-modal-provider>
+            <n-dialog-provider>
+                <n-modal-provider>
+                    <section class="layout">
+                        <LayoutHeader />
+                        <template v-if="logged">
+                            <NuxtPage v-if="settingsLoaded" class="content" />
+                            <LayoutFooter />
+                        </template>
+                        <template v-else>
+                            <form v-show="!isLoading" class="login-form">
+                                <div class="row">
+                                    <n-input v-model:value="login" placeholder="Login (e-mail nebo osobní číslo)" />
+                                </div>
+                                <div class="row">
+                                    <n-input v-model:value="password" type="password" show-password-on="mousedown"
+                                        placeholder="Heslo" />
+                                </div>
+                                <NButton :disabled="!password || !login" @click="logIn(login, password)">
+                                    Přihlásit
+                                </NButton>
+                            </form>
+                        </template>
+                    </section>
+                </n-modal-provider>
+            </n-dialog-provider>
         </NConfigProvider>
     </n-spin>
 </template>
 
 <script setup lang="ts">
 import {
+    NDialogProvider,
     NSpin,
     NModalProvider,
     NButton,
@@ -53,10 +46,9 @@ import { autoLogIn } from "./utils/api";
 import type { ISoldier } from "./types";
 import { logIn } from "#imports";
 
-await useSettings().fetchSettings();
-
-const { isLoading, loadingEnd } = useLayout(),
+const { isLoading, loadingEnd, loadingStart } = useLayout(),
     logged = useState<ISoldier | null>("logged", () => null),
+    {fetchSettings, settingsLoaded} = useSettings(),
     login = ref(),
     password = ref(),
     loaded = ref(false),
@@ -76,6 +68,14 @@ const { isLoading, loadingEnd } = useLayout(),
 useHead({
     title: "AZ Plzeň",
 });
+
+watch(useState("logged"), async (user) => {
+    if (user) {
+        loadingStart()
+        await fetchSettings();
+        loadingEnd()
+    }
+})
 
 onMounted(async () => {
     await autoLogIn();
@@ -101,5 +101,9 @@ body {
     grid-template-rows: auto 1fr auto;
     margin: auto;
     padding: 0 16px;
+}
+.n-data-table-th__title,
+.n-data-table-td {
+    word-break: normal;
 }
 </style>

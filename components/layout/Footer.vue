@@ -1,5 +1,5 @@
 <template>
-  <section class="footer">
+  <section class="footer" v-if="logged.personalNumber !== 1">
     <NuxtLink to="/soldiers">Přehled vojáků</NuxtLink>
     <NuxtLink
       v-if="logged.higherPermission"

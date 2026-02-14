@@ -1,9 +1,9 @@
 <template>
     <div class="drills">
         <h1>Přehled následujících cvičení</h1>
-        <NScrollbar>
-            <NDataTable :style="{maxWidth: 'calc(100vw - 32px'}" :columns="columns" :data="drills" :single-line="false" striped />
-        </NScrollbar>
+        <div :style="{width: '100%', maxWidth: '90vw', margin: 'auto'}">
+            <NDataTable :columns="columns" :data="drills" :single-line="false" striped />
+        </div>
     </div>
 </template>
 
@@ -35,7 +35,7 @@ const personalNumber = useState<ISoldier>("logged").value
         key: "dateFrom",
         title: "Od",
         sorter: "default",
-        defaultSortOrder: "descend",
+        defaultSortOrder: "ascend",
         defaultFilterOptionValues: ["future"],
         filterOptions: [{
             label: 'Budoucí',

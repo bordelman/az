@@ -156,6 +156,27 @@ export async function editSoldier(soldier: Record<any, any>) {
   }
 }
 
+export async function deleteSoldier(personalNumber: number) {
+  console.log("Prdeeeel")
+  loadingStart()
+  try {
+    const resopnse = await fetch(`${apiBaseUrl}soldiers/${personalNumber}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: getBearerToken()
+      },
+    });
+    if (resopnse.status === 204) {
+      return true
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  finally {
+    loadingEnd()
+  }
+}
+
 export async function getNominations(
   personalNumber: string,
 ): Promise<Array<INomination>> {

@@ -9,7 +9,7 @@ export function useLayout() {
 		loadingEnd: () => {
 			processCount.value --;
 			if (!processCount.value) {
-				setTimeout(() => isLoading.value = false, 50)
+				setTimeout(() => isLoading.value = false, 100)
 			}
 		},
 		loadingStart: () => {

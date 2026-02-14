@@ -1,5 +1,6 @@
 const ranks = ref(),
-  positions = ref();
+  positions = ref(),
+  settingsLoaded = ref(false);
 
 export function useSettings() {
   async function fetchSettings() {
@@ -10,9 +11,11 @@ export function useSettings() {
 
     ranks.value = ranksSrc;
     positions.value = positionsSrc;
+    settingsLoaded.value = true;
   }
   return {
     fetchSettings,
+    settingsLoaded,
     ranks,
     positions,
   };

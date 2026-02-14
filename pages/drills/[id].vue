@@ -33,6 +33,11 @@
             </NButton>
         </section>
         <section v-else>Nebyl jste nominován</section>
+        <div>
+            <NButton v-if="logged.position.id === 69010" @click="toggleSquadFilter">{{ showSquad ? "Zobrazit všechny" :
+                "Zobrazit pouze vlastní družstvo" }}</NButton>
+            <pre>{{ showSquad }}</pre>
+        </div>
         <section class="lists">
             <section class="attendents">
                 <h2>
@@ -140,6 +145,7 @@ const { isLoading } = useLayout(),
     parking: Ref<IParking> = ref({ color: "", spz: "", brand: "" }),
     drill = ref((await getDrills({ id }))[0]),
     nominations = ref(await getDrillNominations(id)),
+    showSquad = ref(false),
     myNomination = computed(() =>
         nominations.value.find(
             (nomination) => nomination.soldier.personalNumber === myId,
@@ -148,6 +154,13 @@ const { isLoading } = useLayout(),
     present = computed(() =>
         nominations.value
             .filter((nomination) => nomination.status === EAttendance.Present)
+            .filter((nomination) => {
+                if (showSquad.value) {
+                    const { company, platoon, squad } = nomination.soldier
+                    return company === logged.value.company && platoon === logged.value.platoon && squad === logged.value.squad
+                }
+                return true
+            })
             .sort((a, b) =>
                 a.soldier.lastname.localeCompare(b.soldier.lastname),
             ),
@@ -155,15 +168,27 @@ const { isLoading } = useLayout(),
     absent = computed(() =>
         nominations.value
             .filter((nomination) => nomination.status === EAttendance.Absent)
+            .filter((nomination) => {
+                if (showSquad.value) {
+                    const { company, platoon, squad } = nomination.soldier
+                    return company === logged.value.company && platoon === logged.value.platoon && squad === logged.value.squad
+                }
+                return true
+            })
             .sort((a, b) =>
                 a.soldier.lastname.localeCompare(b.soldier.lastname),
             ),
     ),
     notResponded = computed(() =>
         nominations.value
-            .filter(
-                (nomination) => nomination.status === EAttendance.NotResponded,
-            )
+            .filter((nomination) => nomination.status === EAttendance.NotResponded)
+            .filter((nomination) => {
+                if (showSquad.value) {
+                    const { company, platoon, squad } = nomination.soldier
+                    return company === logged.value.company && platoon === logged.value.platoon && squad === logged.value.squad
+                }
+                return true
+            })
             .sort((a, b) =>
                 a.soldier.lastname.localeCompare(b.soldier.lastname),
             ),
@@ -198,6 +223,10 @@ watch(
         }
     },
 );
+
+function toggleSquadFilter() {
+    showSquad.value = !showSquad.value;
+}
 
 async function callRemoveDrill() {
     await removeDrill(drill.value.id);
