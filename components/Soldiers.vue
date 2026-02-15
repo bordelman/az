@@ -269,7 +269,6 @@ const table = ref(),
     };
 
 function clearFilters() {
-    console.log(table.value);
     table.value.filter(null);
     filters.value = null;
 }
@@ -282,7 +281,6 @@ function onFilterChange(filtersSrc: DataTableFilterState) {
     filters.value = filtersSrc;
 }
 function onSorterChange(sortersSrc: DataTableSortState) {
-    console.log("ARRAY", Array.isArray(sortersSrc), sortersSrc);
     if (Array.isArray(sortersSrc)) {
         if (sortersSrc.every((sorter) => !sorter.order)) {
             return (sorters.value = null);

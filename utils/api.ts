@@ -1,8 +1,8 @@
-import type { INomination, ISoldier, EAttendance, IParking, IDrill } from "~/types";
+import { type INomination, type ISoldier, EAttendance, type IParking, type IDrill, type IAccommodation } from "~/types";
 
 
-// const apiBaseUrl = "http://0.0.0.0:8000/az/api/" || "https://pecaj.fun/az/api/",
-const apiBaseUrl = "https://pecaj.fun/az/api/",
+const apiBaseUrl = "http://0.0.0.0:8000/az/api/",
+// const apiBaseUrl = "https://pecaj.fun/az/api/",
 
   { loadingEnd, loadingStart } = useLayout();
 
@@ -82,7 +82,6 @@ export async function changePassword(
     });
     if (response.status === 200) {
       const result = await response.json();
-      console.log(result);
     } else {
       throw new Error((await response.json()).message);
     }
@@ -165,7 +164,6 @@ export async function editSoldier(soldier: Record<any, any>) {
 }
 
 export async function deleteSoldier(personalNumber: number) {
-  console.log("Prdeeeel")
   loadingStart()
   try {
     const resopnse = await fetch(`${apiBaseUrl}soldiers/${personalNumber}`, {
@@ -350,16 +348,21 @@ export async function removeDrill(id: number) {
 export async function reactToNomination(
   drillId: string,
   attendance: EAttendance,
-  data?: { accommodation?: boolean; parking?: IParking },
+  data?: { accommodation?: IAccommodation; parking?: IParking },
 ) {
-  const { accommodation, parking } = data || {};
+  const { accommodation, parking } = data || {},
+  body = { attendance, parking, accommodation }
+
+  if (body.accommodation && attendance === EAttendance.Absent) {
+    body.accommodation = undefined
+  }
 
   loadingStart();
   try {
     return await (
       await fetch(`${apiBaseUrl}drills/${drillId}/nomination`, {
         method: "PATCH",
-        body: JSON.stringify({ attendance, parking, accommodation }),
+        body: JSON.stringify(body),
         headers: {
           Authorization: getBearerToken(),
           "Content-Type": "application/json",
@@ -411,7 +414,7 @@ export async function getPositions() {
 function getBearerToken() {
   const token = useCookie("army_access_token").value;
   if (!token) {
-    window.alert("Nebyl nalezen token");
+    console.log("Nebyl nalezen token");
   }
   return "Bearer " + token;
 }

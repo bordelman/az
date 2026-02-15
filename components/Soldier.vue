@@ -58,6 +58,23 @@
                     </tr>
                     <tr>
                         <td>
+                            Datum narození:
+                        </td>
+                        <td><span v-if="!edit">{{ new Date(soldier.birthDate).toLocaleDateString("cs") }}</span>
+                            <NDatePicker v-else v-model:value="soldier.birthDate" placeholder="Datum narození" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Adresa trvalého bydliště:
+                        </td>
+                        <td><span v-if="!edit">{{ soldier.permanentAddress }}</span>
+                            <NInput v-else v-model:value="soldier.permanentAddress"
+                                placeholder="Adresa trvalého bydliště" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             Pracovně lékařská prohlídka do:
                         </td>
                         <td>
@@ -76,7 +93,8 @@
                         <td>
                             Zdravotní klasifikace:
                         </td>
-                        <td><span v-if="!edit || !logged.higherPermission">{{ soldier.medicalClasification }}</span>
+                        <td>
+                            <span v-if="!edit || !logged.higherPermission">{{ soldier.medicalClasification }}</span>
                             <NSelect v-else v-model:value="soldier.medicalClasification"
                                 :options="medicalClasificationOptions" placeholder="Zdravotní klasifikace" />
                         </td>
@@ -142,6 +160,27 @@
                             <span v-if="!edit || !logged.higherPermission">{{ soldier.squad }}</span>
                             <NSelect v-else v-model:value="soldier.squad" :options="squadOptions"
                                 placeholder="Družstvo" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Značka automobilu</td>
+                        <td>
+                            <span v-if="!edit">{{ soldier.carBrand }}</span>
+                            <NInput v-else v-model:value="soldier.carBrand" placeholder="Značka automobilu" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Barva automobilu</td>
+                        <td>
+                            <span v-if="!edit">{{ soldier.carColor }}</span>
+                            <NInput v-else v-model:value="soldier.carColor" placeholder="Barva automobilu" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SPZ automobilu</td>
+                        <td>
+                            <span v-if="!edit">{{ soldier.carLicensePlate }}</span>
+                            <NInput v-else v-model:value="soldier.carLicensePlate" placeholder="SPZ automobilu" />
                         </td>
                     </tr>
                 </NTable>
@@ -344,6 +383,11 @@ async function callEditSoldier() {
         Object.assign(
             soldier.value,
             await editSoldier({
+                birthDate: parseDate(soldier.value?.birthDate),
+                carBrand: soldier.value?.carBrand || null,
+                carColor: soldier.value?.carColor || null,
+                carLicensePlate: soldier.value?.carLicensePlate || null,
+                permanentAddress: soldier.value?.permanentAddress || null,
                 titleAfter: soldier.value.titleAfter || null,
                 titleBefore: soldier.value.titleBefore || null,
                 personalNumber: soldier.value.personalNumber,
@@ -356,9 +400,7 @@ async function callEditSoldier() {
                 company: soldier.value.company,
                 platoon: soldier.value.platoon,
                 squad: soldier.value.squad,
-                medicalExaminationDue: parseDate(
-                    soldier.value.medicalExaminationDue,
-                ),
+                medicalExaminationDue: parseDate(soldier.value.medicalExaminationDue),
                 medicalClasification: soldier.value.medicalClasification,
             }),
         );
@@ -369,7 +411,11 @@ async function callEditSoldier() {
     }
 }
 
-function parseDate(date: Date) {
+function parseDate(date?: Date) {
+    if (!date) {
+        return
+    }
+
     const dateSource = new Date(date),
         year = dateSource.getFullYear(),
         month = dateSource.getMonth() + 1,

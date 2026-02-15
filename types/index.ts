@@ -15,13 +15,15 @@ export interface IDrill {
 }
 
 export interface INomination {
-  accommodation?: boolean;
+  accommodation?: IAccommodation;
   drill: IDrill;
   parking: IParking;
   soldier: ISoldier;
   status: EAttendance;
 }
 export interface ISoldier {
+  birthDate?: Date;
+  permanentAddress?: string;
   titleAfter: string;
   titleBefore: string;
   company: number;
@@ -38,6 +40,15 @@ export interface ISoldier {
   rank: IRank;
   squad: number | null;
   higherPermission: boolean;
+  carBrand: string;
+  carColor: string;
+  carLicensePlate: string;
+}
+
+export interface IAccommodation {
+  birthDate: Date;
+  id: string;
+  permanentAddress: string;
 }
 
 export interface IParking {

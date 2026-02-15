@@ -107,7 +107,7 @@ async function callCreateSoldier() {
 
         useRouter().replace("/soldiers/" + soldierCreated.personalNumber);
     } catch (error) {
-        console.log("soldier not created");
+        window.alert("soldier not created: " + error.message);
     }
 
 }

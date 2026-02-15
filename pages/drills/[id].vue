@@ -66,7 +66,19 @@
                             <template #trigger>
                                 <div class="badge">U</div>
                             </template>
-                            Zažádal o poskytnutí ubytování
+                            <div
+                                v-if="logged.personalNumber === nomination.soldier.personalNumber || logged.higherPermission">
+                                <div class="accommodation-row">Adresa trvalého bydliště: <b>{{
+                                    nomination.accommodation.permanentAddress }}</b></div>
+                                <div class="accommodation-row">Číslo OP/pasu: <b>{{ nomination.accommodation.id }}</b>
+                                </div>
+                                <div class="accommodation-row">Datum narození: <b>{{ new
+                                    Date(nomination.accommodation.birthDate).toLocaleDateString("cs")
+                                        }}</b></div>
+                            </div>
+                            <div v-else>
+                                Zažádal o poskytnutí ubytování
+                            </div>
                         </NTooltip>
                         <NTooltip v-if="nomination.soldier.personalNumber == myId">
                             <template #trigger>
@@ -108,32 +120,33 @@
         </section>
         <NModal v-model:show="showParkingModal" class="custom-card" preset="card" :style="{ maxWidth: '60ch' }"
             title="Parkování" :bordered="false" size="huge">
-            <div class="input-row">
+            <NCheckbox v-model:checked="parkingRequest">Žádost o parkování
+            </NCheckbox>
+
+            <div v-if="parkingRequest" class="parking-data">
                 <NInput v-model:value="parking.brand" placeholder="Značka vozu" />
-            </div>
-            <div class="input-row">
                 <NInput v-model:value="parking.color" placeholder="Barva" />
-            </div>
-            <div class="input-row">
                 <NInput v-model:value="parking.spz" placeholder="SPZ" />
             </div>
             <div v-if="drill.offerAccommodation" class="input-row">
-                <NCheckbox v-model:checked="accommodation">Chci ubytování
+                <NCheckbox v-model:checked="accommodationRequest">Žádost o ubytování
                 </NCheckbox>
+                <div v-if="accommodationRequest" class="accommodation-data">
+                    <NDatePicker v-model:value="accommodation.birthDate" />
+                    <NInput v-model:value="accommodation.id" placeholder="Číslo OP/pasu" />
+                    <NInput v-model:value="accommodation.permanentAddress" placeholder="Adresa trvalého bydliště" />
+                </div>
             </div>
-            <NButton @click="addMe">
-                {{
-                    Object.values(parking).every((item) => item)
-                        ? "Zúčastním se s parkováním"
-                        : "Zúčastním se bez parkování"
-                }}
+            <NButton @click="addMe"
+                :disabled="parkingRequest && Object.values(parking).some(value => !value) || accommodationRequest && Object.values(accommodation || {}).some(value => !value)">
+                Zúčastním se
             </NButton>
         </NModal>
     </section>
 </template>
 
 <script setup lang="ts">
-import { NButton, NCard, NCheckbox, NInput, NModal, NTooltip } from "naive-ui";
+import { NButton, NCard, NCheckbox, NDatePicker, NInput, NModal, NTooltip } from "naive-ui";
 import { EAttendance, type IParking, type ISoldier } from "~/types";
 
 const { isLoading } = useLayout(),
@@ -141,7 +154,6 @@ const { isLoading } = useLayout(),
     myId = logged.value.personalNumber,
     { id } = useRoute().params as unknown as { id: string },
     showParkingModal = ref(false),
-    parking: Ref<IParking> = ref({ color: "", spz: "", brand: "" }),
     drill = ref((await getDrills({ id }))[0]),
     nominations = ref(await getDrillNominations(id)),
     showSquad = ref(false),
@@ -207,8 +219,34 @@ const { isLoading } = useLayout(),
             (nomination) => nomination.soldier.personalNumber === myId,
         ),
     ),
-    accommodation = ref(false);
+    parkingRequest = ref(!!myNomination.value?.parking),
+    accommodationRequest = ref(!!myNomination.value?.accommodation),
+    accommodation = ref(myNomination.value?.accommodation),
+    parking: Ref = ref(myNomination.value?.parking);
 
+
+watch(
+    () => parkingRequest.value,
+    (show) => {
+        if (show) {
+            parking.value = parking.value || { color: logged.value.carColor, spz: logged.value.carLicensePlate, brand: logged.value.carBrand }
+        }
+        else {
+            parking.value = undefined
+        }
+    }
+)
+watch(
+    () => accommodationRequest.value,
+    (show) => {
+        if (show) {
+            accommodation.value = accommodation.value || { birthDate: logged.value.birthDate, id: "", permanentAddress: logged.value.permanentAddress }
+        }
+        else {
+            accommodation.value = undefined
+        }
+    }
+)
 watch(
     () => drill.value.id,
     async (newId) => {
@@ -234,20 +272,14 @@ async function callRemoveDrill() {
 }
 
 async function editNomination() {
-    if (myNomination.value?.parking) {
-        parking.value = myNomination.value?.parking as IParking;
-    }
-    accommodation.value = !!myNomination.value?.accommodation;
+    parking.value = myNomination.value?.parking as IParking;
+    accommodation.value = myNomination.value?.accommodation;
     showParkingModal.value = true;
 }
 
 async function addMe() {
-    const parkingNom = Object.values(parking.value).every((item) => item)
-        ? parking.value
-        : undefined;
-
     nominations.value = await reactToNomination(id, EAttendance.Present, {
-        parking: parkingNom,
+        parking: parking.value,
         accommodation: accommodation.value,
     });
 
@@ -256,13 +288,15 @@ async function addMe() {
 }
 
 async function removeMe() {
+    accommodationRequest.value = false;
+    parkingRequest.value = false;
     nominations.value = await reactToNomination(id, EAttendance.Absent);
 }
 
 function exportCsv(parameter: "complet" | "parking" | "accommodation") {
     let fileName = "";
 
-    const headRow = ["Osobní číslo", "Hodnost", "Jméno", "Příjmení"],
+    const headRow = ["Osobní číslo", "Hodnost", "Titul před jménem", "Jméno", "Příjmení", "Titul za jménem"],
         data: Array<string | number> = [],
         addRow = (row: Array<string | number>) => {
             data.push(row.join(";") + "\n");
@@ -271,6 +305,7 @@ function exportCsv(parameter: "complet" | "parking" | "accommodation") {
 
     switch (parameter) {
         case "accommodation":
+            headRow.push("Datum narození", "Číslo OP/pasu", "Adresa trvalého bydliště", "Ubytování požadováno (s nástupem) od...do...", "Krycí číslo a dislokace")
             fileName = "Ubytování";
             break;
         case "complet":
@@ -286,9 +321,11 @@ function exportCsv(parameter: "complet" | "parking" | "accommodation") {
 
     for (const nomination of present.value) {
         const { accommodation, parking, soldier } = nomination,
-            { firstname, lastname, personalNumber, rank } = soldier,
-            row = [personalNumber, rank.rank, firstname, lastname],
-            rowAccommodation = accommodation ? "Ano" : "Ne",
+            { firstname, lastname, personalNumber, rank, titleAfter, titleBefore } = soldier,
+            row = [personalNumber, rank.rank, titleBefore, firstname, lastname, titleAfter],
+            rowAccommodation = accommodation
+                ? [new Date(accommodation.birthDate).toLocaleDateString("cs"), accommodation.id, accommodation.permanentAddress, `${new Date(drill.value.dateFrom).toLocaleDateString("cs")} - ${new Date(drill.value.dateTo).toLocaleDateString("cs")}`, "Plzeň VZ 5309"]
+                : "Ne",
             rowParking = parking
                 ? Object.values(parking || {}).join(", ")
                 : "Ne";
@@ -296,11 +333,12 @@ function exportCsv(parameter: "complet" | "parking" | "accommodation") {
         switch (parameter) {
             case "accommodation":
                 if (accommodation) {
+                    row.push(...rowAccommodation)
                     addRow(row);
                 }
                 break;
             case "complet":
-                row.push(rowAccommodation, rowParking);
+                row.push(rowAccommodation.toString(), rowParking);
                 addRow(row);
                 break;
             case "parking":
