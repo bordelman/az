@@ -132,7 +132,7 @@
                 <NCheckbox v-model:checked="accommodationRequest">Žádost o ubytování
                 </NCheckbox>
                 <div v-if="accommodationRequest" class="accommodation-data">
-                    <NDatePicker v-model:value="accommodation.birthDate" />
+                    <NDatePicker v-model:value="accommodation.birthDate" placeholder="Datum narozenígit" />
                     <NInput v-model:value="accommodation.id" placeholder="Číslo OP/pasu" />
                     <NInput v-model:value="accommodation.permanentAddress" placeholder="Adresa trvalého bydliště" />
                 </div>
@@ -224,42 +224,41 @@ const { isLoading } = useLayout(),
     accommodation = ref(myNomination.value?.accommodation),
     parking: Ref = ref(myNomination.value?.parking);
 
+watch(showParkingModal, (show) => {
+    if (show) {
+        parkingRequest.value = !!myNomination.value?.parking
+        accommodationRequest.value = !!myNomination.value?.accommodation
+    }
+})
 
-watch(
-    () => parkingRequest.value,
-    (show) => {
-        if (show) {
-            parking.value = parking.value || { color: logged.value.carColor, spz: logged.value.carLicensePlate, brand: logged.value.carBrand }
-        }
-        else {
-            parking.value = undefined
-        }
+watch(parkingRequest, (show) => {
+    if (show) {
+        parking.value = parking.value || { color: logged.value.carColor, spz: logged.value.carLicensePlate, brand: logged.value.carBrand }
     }
-)
-watch(
-    () => accommodationRequest.value,
-    (show) => {
-        if (show) {
-            accommodation.value = accommodation.value || { birthDate: logged.value.birthDate, id: "", permanentAddress: logged.value.permanentAddress }
-        }
-        else {
-            accommodation.value = undefined
-        }
+    else {
+        parking.value = undefined
     }
-)
-watch(
-    () => drill.value.id,
-    async (newId) => {
-        if (newId) {
-            const [drillsArrSrc, nominationsSrc] = await Promise.all([
-                getDrills({ id }),
-                getDrillNominations(id),
-            ]);
-            drill.value = drillsArrSrc[0];
-            nominations.value = nominationsSrc;
-        }
-    },
-);
+})
+
+watch(accommodationRequest, (show) => {
+    if (show) {
+        accommodation.value = accommodation.value || { birthDate: logged.value.birthDate, id: "", permanentAddress: logged.value.permanentAddress }
+    }
+    else {
+        accommodation.value = undefined
+    }
+})
+
+watch(() => drill.value.id, async (newId) => {
+    if (newId) {
+        const [drillsArrSrc, nominationsSrc] = await Promise.all([
+            getDrills({ id }),
+            getDrillNominations(id),
+        ]);
+        drill.value = drillsArrSrc[0];
+        nominations.value = nominationsSrc;
+    }
+});
 
 function toggleSquadFilter() {
     showSquad.value = !showSquad.value;

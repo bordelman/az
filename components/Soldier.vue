@@ -60,8 +60,8 @@
                         <td>
                             Datum narození:
                         </td>
-                        <td><span v-if="!edit">{{ new Date(soldier.birthDate).toLocaleDateString("cs") }}</span>
-                            <NDatePicker v-else v-model:value="soldier.birthDate" placeholder="Datum narození" />
+                        <td><span v-if="!edit">{{ soldier.birthDate ? new Date(soldier.birthDate).toLocaleDateString("cs") : ""}}</span>
+                            <NDatePicker v-else v-model:value="soldier.birthDate" placeholder="Datum narození" clearable/>
                         </td>
                     </tr>
                     <tr>
