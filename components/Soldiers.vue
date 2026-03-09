@@ -4,7 +4,7 @@
             <NButton v-if="filters" @click="clearFilters">Restartovat filtry</NButton>
             <NButton v-if="sorters" @click="clearSorter">Restartovat řazení</NButton>
         </div>
-        <div :style="{width: '100%', maxWidth: '90vw', margin: 'auto'}">
+        <div :style="{ width: '100%', maxWidth: '90vw', margin: 'auto' }">
             <NDataTable ref="table" striped :columns="columns" :data="soldiers"
                 :row-key="(row: RowData) => row.personalNumber" :row-props="rowProps"
                 :on-update:filters="onFilterChange" :on-update:sorter="onSorterChange" />
@@ -191,8 +191,10 @@ const table = ref(),
                     title: "Rota",
                     key: "company",
                     sorter: {
-                        compare: (soldier1: ISoldier, soldier2: ISoldier) =>
-                            soldier1.company - soldier2.company,
+                        compare: (soldier1: ISoldier, soldier2: ISoldier) => {
+                            if (soldier1 === null) return -1;
+                            return soldier1.company - soldier2.company
+                        },
                         multiple: 10,
                     },
                     filterOptions: companyFiltrOptions,
@@ -205,8 +207,10 @@ const table = ref(),
                     title: "Četa",
                     key: "platoon",
                     sorter: {
-                        compare: (soldier1: ISoldier, soldier2: ISoldier) =>
-                            (soldier1.platoon || 0) - (soldier2.platoon || 0),
+                        compare: (soldier1: ISoldier, soldier2: ISoldier) => {
+                            if (soldier1.platoon === null) return -1;
+                            return soldier1.platoon - (soldier2.platoon || 0)
+                        },
                         multiple: 9,
                     },
                     filterOptions: platoonFiltrOptions,
@@ -219,8 +223,10 @@ const table = ref(),
                     title: "Družstvo",
                     key: "squad",
                     sorter: {
-                        compare: (soldier1: ISoldier, soldier2: ISoldier) =>
-                            (soldier1.squad || 0) - (soldier2.squad || 0),
+                        compare: (soldier1: ISoldier, soldier2: ISoldier) => {
+                            if (soldier1.squad === null) return -1;
+                            return soldier1.squad - (soldier2.squad || 0)
+                        },
                         multiple: 8,
                     },
                     filterOptions: squadFiltrOptions,
@@ -232,9 +238,12 @@ const table = ref(),
                 {
                     title: "Lékařská prohlídka",
                     key: "medicalExaminationDue",
-                    sorter: (soldier1: ISoldier, soldier2: ISoldier) =>
-                        new Date(soldier1.medicalExaminationDue).getTime() -
-                        new Date(soldier2.medicalExaminationDue).getTime(),
+                    sorter: (soldier1: ISoldier, soldier2: ISoldier) => {
+                        if (!soldier1.medicalExaminationDue) return -1;
+                        if (!soldier2.medicalExaminationDue) return 1;
+
+                        new Date(soldier1.medicalExaminationDue).getTime() - new Date(soldier2.medicalExaminationDue).getTime()
+                    },
                     filterOptions: [
                         {
                             label: "K dnešnímu datu",
@@ -242,6 +251,7 @@ const table = ref(),
                         },
                     ],
                     filter(value: number, soldier: ISoldier) {
+                        if (!soldier.medicalExaminationDue) return false;
                         return (
                             new Date(soldier.medicalExaminationDue).getTime() >=
                             value
@@ -251,9 +261,9 @@ const table = ref(),
                         return h(
                             "span",
                             soldier.medicalExaminationDue ?
-                            new Date(
-                                soldier.medicalExaminationDue,
-                            ).toLocaleDateString("cs") : "NEVYPLNĚNO",
+                                new Date(
+                                    soldier.medicalExaminationDue,
+                                ).toLocaleDateString("cs") : "NEVYPLNĚNO",
                         );
                     },
                 },
