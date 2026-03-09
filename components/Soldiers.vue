@@ -239,10 +239,7 @@ const table = ref(),
                     title: "Lékařská prohlídka",
                     key: "medicalExaminationDue",
                     sorter: (soldier1: ISoldier, soldier2: ISoldier) => {
-                        if (!soldier1.medicalExaminationDue) return -1;
-                        if (!soldier2.medicalExaminationDue) return 1;
-
-                        new Date(soldier1.medicalExaminationDue).getTime() - new Date(soldier2.medicalExaminationDue).getTime()
+                        return new Date(soldier1.medicalExaminationDue).getTime() - new Date(soldier2.medicalExaminationDue).getTime()
                     },
                     filterOptions: [
                         {
