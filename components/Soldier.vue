@@ -60,8 +60,11 @@
                         <td>
                             Datum narození:
                         </td>
-                        <td><span v-if="!edit">{{ soldier.birthDate ? new Date(soldier.birthDate).toLocaleDateString("cs") : ""}}</span>
-                            <NDatePicker v-else v-model:value="soldier.birthDate" placeholder="Datum narození" clearable/>
+                        <td><span v-if="!edit">{{ soldier.birthDate ? new
+                            Date(soldier.birthDate).toLocaleDateString("cs") :
+                                ""}}</span>
+                            <NDatePicker v-else v-model:value="soldier.birthDate" placeholder="Datum narození"
+                                clearable />
                         </td>
                     </tr>
                     <tr>
@@ -73,16 +76,16 @@
                                 placeholder="Adresa trvalého bydliště" />
                         </td>
                     </tr>
-                    <tr>
+                    <tr :class="{missing: !soldier.medicalExaminationDue}">
                         <td>
                             Pracovně lékařská prohlídka do:
                         </td>
                         <td>
                             <span v-if="!edit">
                                 {{
-                                    new Date(soldier.medicalExaminationDue).toLocaleDateString(
+                                     soldier.medicalExaminationDue ? new Date(soldier.medicalExaminationDue).toLocaleDateString(
                                         "cs",
-                                    )
+                                    ) : "Chybí data"
                                 }}
                             </span>
                             <NDatePicker v-else v-model:value="soldier.medicalExaminationDue"
@@ -137,27 +140,27 @@
                             Rota:
                         </td>
                         <td>
-                            <span v-if="!edit || !logged.higherPermission">{{ soldier.company }}</span>
+                            <span v-if="!edit || !logged.higherPermission">{{ companyOptions[soldier.company].label }}</span>
                             <NSelect v-else v-model:value="soldier.company" :options="companyOptions"
                                 placeholder="Rota" />
                         </td>
                     </tr>
-                    <tr v-if="soldier.platoon || edit">
+                    <tr v-if="typeof soldier.platoon === 'number' || edit">
                         <td>
                             Četa:
                         </td>
                         <td>
-                            <span v-if="!edit || !logged.higherPermission">{{ soldier.platoon }}</span>
+                            <span v-if="!edit || !logged.higherPermission">{{ platoonOptions[soldier.platoon].label }}</span>
                             <NSelect v-else v-model:value="soldier.platoon" :options="platoonOptions"
                                 placeholder="Četa" />
                         </td>
                     </tr>
-                    <tr v-if="soldier.squad || edit">
+                    <tr v-if="typeof soldier.squad === 'number' || edit">
                         <td>
                             Družstvo:
                         </td>
                         <td>
-                            <span v-if="!edit || !logged.higherPermission">{{ soldier.squad }}</span>
+                            <span v-if="!edit || !logged.higherPermission">{{ squadOptions[soldier.squad].label }}</span>
                             <NSelect v-else v-model:value="soldier.squad" :options="squadOptions"
                                 placeholder="Družstvo" />
                         </td>
@@ -329,6 +332,12 @@ import {
 } from "naive-ui";
 import { EAttendance, type INomination, type ISoldier } from "~/types";
 import { deleteSoldier } from "#imports";
+import {
+    companyOptions,
+    platoonOptions,
+    squadOptions,
+    medicalClasificationOptions
+} from "~/types"
 
 const logged = useState<ISoldier>("logged"),
     edit = ref(false),
@@ -347,23 +356,6 @@ const logged = useState<ISoldier>("logged"),
             value: rank.id,
         };
     }),
-    companyOptions = [{ label: 1, value: 1 }],
-    platoonOptions = [
-        { label: 1, value: 1 },
-        { label: 2, value: 2 },
-        { label: 3, value: 3 },
-        { label: 4, value: 4 },
-    ],
-    squadOptions = [
-        { label: 1, value: 1 },
-        { label: 2, value: 2 },
-        { label: 3, value: 3 },
-    ],
-    medicalClasificationOptions = [
-        { label: "A", value: 1 },
-        { label: "B", value: 2 },
-        { label: "C", value: 3 },
-    ],
     soldier = ref<ISoldier | null>(null),
     nominationsAbsent = ref<Array<INomination>>([]),
     nominationsNotResponded = ref<Array<INomination>>([]),
@@ -506,6 +498,14 @@ onMounted(async () => {
             @media (min-width: 500px) {
                 display: grid;
                 grid-template-columns: 250px 200px;
+            }
+        }
+
+        .missing {
+            color: red;
+
+            td {
+                color: inherit
             }
         }
     }

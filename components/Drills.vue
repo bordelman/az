@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { NuxtLink } from "#components";
-import { NDataTable, NScrollbar, type DataTableColumns } from "naive-ui";
+import { NDataTable, type DataTableColumns } from "naive-ui";
 import { EAttendance, type IDrill, type ISoldier } from "~/types";
 const personalNumber = useState<ISoldier>("logged").value
     .personalNumber as unknown as string,
@@ -46,10 +46,10 @@ const personalNumber = useState<ISoldier>("logged").value
         }],
         filter: (value: any, row: any) => {
             if (value === 'future') {
-                return new Date(row.dateFrom) > new Date();
+                return new Date(row.dateTo) > new Date();
             }
             if (value === 'past') {
-                return new Date(row.dateFrom) <= new Date();
+                return new Date(row.dateTo) <= new Date();
             }
             return true
         },

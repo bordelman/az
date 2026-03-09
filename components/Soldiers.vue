@@ -23,6 +23,11 @@ import {
 import { getSoldiers } from "@/utils/api";
 import type { ISoldier } from "~/types";
 import type { RowData } from "naive-ui/es/data-table/src/interface";
+import {
+    companyOptions,
+    platoonOptions,
+    squadOptions
+} from "~/types"
 
 const table = ref(),
     filters = ref(),
@@ -45,7 +50,7 @@ const table = ref(),
             }, [])
             .map((item) => {
                 return {
-                    label: item.squad,
+                    label: item.squad === null ? "NEVYPLNĚNO" : squadOptions[item.squad].label,
                     value: item.squad,
                 };
             })
@@ -63,7 +68,7 @@ const table = ref(),
                 }, [])
                 .map((item) => {
                     return {
-                        label: item.platoon,
+                        label: item.platoon === null ? "NEVYPLNĚNO" : platoonOptions[item.platoon].label,
                         value: item.platoon,
                     };
                 })
@@ -81,7 +86,7 @@ const table = ref(),
                 }, [])
                 .map((item) => {
                     return {
-                        label: item.company,
+                        label: item.company === null ? "NEVYPLNĚNO" : companyOptions[item.company].label,
                         value: item.company,
                     };
                 })
@@ -194,6 +199,7 @@ const table = ref(),
                     filter(company: number, soldier: ISoldier) {
                         return soldier.company === company;
                     },
+                    render: (soldier: ISoldier) => soldier.company === null ? "NEVYPLNĚNO" : companyOptions[soldier.company].label
                 },
                 {
                     title: "Četa",
@@ -207,6 +213,7 @@ const table = ref(),
                     filter(platoon: number, soldier: ISoldier) {
                         return soldier.platoon === platoon;
                     },
+                    render: (soldier: ISoldier) => soldier.platoon === null ? "NEVYPLNĚNO" : platoonOptions[soldier.platoon].label
                 },
                 {
                     title: "Družstvo",
@@ -220,6 +227,7 @@ const table = ref(),
                     filter(squad: number, soldier: ISoldier) {
                         return soldier.squad === squad;
                     },
+                    render: (soldier: ISoldier) => soldier.squad === null ? "NEVYPLNĚNO" : squadOptions[soldier.squad].label
                 },
                 {
                     title: "Lékařská prohlídka",
@@ -242,9 +250,10 @@ const table = ref(),
                     render(soldier: ISoldier) {
                         return h(
                             "span",
+                            soldier.medicalExaminationDue ?
                             new Date(
                                 soldier.medicalExaminationDue,
-                            ).toLocaleDateString("cs"),
+                            ).toLocaleDateString("cs") : "NEVYPLNĚNO",
                         );
                     },
                 },

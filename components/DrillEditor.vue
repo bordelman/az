@@ -261,12 +261,14 @@ const { drill, nominated } = defineProps({
           },
         ],
         filter(value: number, soldier: ISoldier) {
-          return new Date(soldier.medicalExaminationDue).getTime() >= value;
+          if (soldier.medicalExaminationDue) {
+            return new Date(soldier.medicalExaminationDue).getTime() >= value;
+          }
         },
         render(soldier: ISoldier) {
           return h(
             "span",
-            new Date(soldier.medicalExaminationDue).toLocaleDateString("cs")
+            soldier.medicalExaminationDue ? new Date(soldier.medicalExaminationDue).toLocaleDateString("cs") : ""
           );
         },
       },

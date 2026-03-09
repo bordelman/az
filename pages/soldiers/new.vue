@@ -64,6 +64,12 @@
 <script setup lang="ts">
 import { NButton, NDatePicker, NInput, NInputNumber, NSelect } from "naive-ui";
 import type { ISoldier } from "~/types";
+import {
+    companyOptions,
+    platoonOptions,
+    squadOptions,
+    medicalClasificationOptions
+} from "~/types"
 
 const soldier: ISoldier = reactive({}),
     { positions, ranks } = useSettings(),
@@ -78,29 +84,12 @@ const soldier: ISoldier = reactive({}),
             label: rank.rank,
             value: rank.id,
         };
-    }),
-    companyOptions = [{ label: 1, value: 1 }],
-    platoonOptions = [
-        { label: 1, value: 1 },
-        { label: 2, value: 2 },
-        { label: 3, value: 3 },
-        { label: 4, value: 4 },
-    ],
-    squadOptions = [
-        { label: 1, value: 1 },
-        { label: 2, value: 2 },
-        { label: 3, value: 3 },
-    ],
-    medicalClasificationOptions = [
-        { label: "A", value: 1 },
-        { label: "B", value: 2 },
-        { label: "C", value: 3 },
-    ];
+    });
 
 async function callCreateSoldier() {
-    if (!soldier.platoon) delete soldier.platoon;
-    if (!soldier.squad) delete soldier.squad;
-    soldier.medicalExaminationDue = parseDate(soldier.medicalExaminationDue);
+    if ([null, undefined].includes(soldier.platoon)) delete soldier.platoon;
+    if ([null, undefined].includes(soldier.squad)) delete soldier.squad;
+    soldier.medicalExaminationDue = soldier.medicalExaminationDue ? parseDate(soldier.medicalExaminationDue) : undefined;
 
     try {
         const soldierCreated = await createSoldier(soldier);
