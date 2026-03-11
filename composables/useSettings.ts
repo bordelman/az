@@ -1,4 +1,4 @@
-const ranks = ref(),
+const ranks = ref<Array<{id: number, abbreviation: string, rank: string}>>(),
   positions = ref(),
   settingsLoaded = ref(false);
 

@@ -22,11 +22,17 @@ export interface INomination {
   status: EAttendance;
 }
 export interface ISoldier {
+  assignment?: {
+    id: number;
+    platoon: number | null;
+    company: number;
+    squad: number | null;
+    position: IPosition;
+  };
   birthDate?: Date;
   permanentAddress?: string;
   titleAfter: string;
   titleBefore: string;
-  company: number;
   email: string;
   firstname: string;
   lastname: string;
@@ -35,10 +41,7 @@ export interface ISoldier {
   mobile: string;
   password: string;
   personalNumber: number;
-  platoon: number | null;
-  position: IPosition;
   rank: IRank;
-  squad: number | null;
   higherPermission: boolean;
   carBrand: string;
   carColor: string;
@@ -91,6 +94,7 @@ export const
     { label: 3, value: 3 },
   ],
   medicalClasificationOptions = [
+    { label: "-", value: 0 },
     { label: "A", value: 1 },
     { label: "B1", value: 2 },
     { label: "B2", value: 3 },

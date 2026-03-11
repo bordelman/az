@@ -42,7 +42,7 @@ const table = ref(),
             .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
                 if (
                     !acc.some(
-                        (soldier) => soldier.squad === currentValue.squad,
+                        (soldier) => soldier.assignment?.squad === currentValue.assignment?.squad,
                     )
                 )
                     acc.push(currentValue);
@@ -50,17 +50,17 @@ const table = ref(),
             }, [])
             .map((item) => {
                 return {
-                    label: item.squad === null ? "NEVYPLNĚNO" : squadOptions[item.squad].label,
-                    value: item.squad,
+                    label: !item.assignment || item.assignment.squad === null ? "NEVYPLNĚNO" : squadOptions[item.assignment.squad].label,
+                    value: item.assignment?.squad ?? null,
                 };
             })
-            .sort((item1, item2) => item1.value - item2.value),
+            .sort(sortId),
             platoonFiltrOptions = filteredSoldiers.value
                 .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
                     if (
                         !acc.some(
                             (soldier) =>
-                                soldier.platoon === currentValue.platoon,
+                                soldier.assignment?.platoon === currentValue.assignment?.platoon,
                         )
                     )
                         acc.push(currentValue);
@@ -68,17 +68,17 @@ const table = ref(),
                 }, [])
                 .map((item) => {
                     return {
-                        label: item.platoon === null ? "NEVYPLNĚNO" : platoonOptions[item.platoon].label,
-                        value: item.platoon,
+                        label: !item.assignment || item.assignment.platoon === null ? "NEVYPLNĚNO" : platoonOptions[item.assignment.platoon].label,
+                        value: item.assignment?.platoon ?? null,
                     };
                 })
-                .sort((item1, item2) => item1.value - item2.value),
+                .sort(sortId),
             companyFiltrOptions = filteredSoldiers.value
                 .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
                     if (
                         !acc.some(
                             (soldier) =>
-                                soldier.company === currentValue.company,
+                                soldier.assignment?.company === currentValue.assignment?.company,
                         )
                     )
                         acc.push(currentValue);
@@ -86,18 +86,17 @@ const table = ref(),
                 }, [])
                 .map((item) => {
                     return {
-                        label: item.company === null ? "NEVYPLNĚNO" : companyOptions[item.company].label,
-                        value: item.company,
+                        label: !item.assignment || item.assignment.company === null ? "NEVYPLNĚNO" : companyOptions[item.assignment.company].label,
+                        value: item.assignment?.company ?? null,
                     };
                 })
-                .sort((item1, item2) => item1.value - item2.value),
+                .sort(sortId),
             positionFiltrOptions = filteredSoldiers.value
                 .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
                     if (
                         !acc.some(
                             (soldier) =>
-                                soldier.position.id ===
-                                currentValue.position.id,
+                                soldier.assignment?.position.id === currentValue.assignment?.position.id,
                         )
                     )
                         acc.push(currentValue);
@@ -105,11 +104,11 @@ const table = ref(),
                 }, [])
                 .map((item) => {
                     return {
-                        label: item.position.position,
-                        value: item.position.id,
+                        label: item.assignment?.position.position ?? "Nevyplněno",
+                        value: item.assignment?.position.id ?? null,
                     };
                 })
-                .sort((item1, item2) => item1.value - item2.value),
+                .sort(sortId),
             rankFiltrOptions = filteredSoldiers.value
                 .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
                     if (
@@ -154,9 +153,7 @@ const table = ref(),
                     key: "firstname",
                     sorter: {
                         compare: (soldier1: ISoldier, soldier2: ISoldier) =>
-                            soldier1.firstname.localeCompare(
-                                soldier2.firstname,
-                            ),
+                            soldier1.firstname.localeCompare(soldier2.firstname),
                         multiple: 5,
                     },
                 },
@@ -173,18 +170,21 @@ const table = ref(),
                     title: "Pozice",
                     key: "position",
                     render(soldier: ISoldier) {
-                        return h("span", soldier.position.position);
+                        return h("span", soldier.assignment?.position.position);
                     },
                     sorter: {
-                        compare: (soldier1: ISoldier, soldier2: ISoldier) =>
-                            soldier1.position.position.localeCompare(
-                                soldier2.position.position,
-                            ),
+                        compare: (soldier1: ISoldier, soldier2: ISoldier) => {
+                            const pos1 = soldier1.assignment?.position.position,
+                                pos2 = soldier2.assignment?.position.position;
+                            if (!pos1) return -1
+                            if (!pos2) return 1
+                            return pos1.localeCompare(pos2)
+                        },
                         multiple: 7,
                     },
                     filterOptions: positionFiltrOptions,
                     filter(position: number, soldier: ISoldier) {
-                        return soldier.position.id === position;
+                        return soldier.assignment?.position.id === position;
                     },
                 },
                 {
@@ -192,48 +192,58 @@ const table = ref(),
                     key: "company",
                     sorter: {
                         compare: (soldier1: ISoldier, soldier2: ISoldier) => {
-                            if (soldier1 === null) return -1;
-                            return soldier1.company - soldier2.company
+                            if (!soldier1.assignment?.company) return -1;
+                            if (!soldier2.assignment?.company) return 1;
+                            return soldier1.assignment.company - soldier2.assignment.company
                         },
                         multiple: 10,
                     },
                     filterOptions: companyFiltrOptions,
                     filter(company: number, soldier: ISoldier) {
-                        return soldier.company === company;
+                        return soldier.assignment?.company === company;
                     },
-                    render: (soldier: ISoldier) => soldier.company === null ? "NEVYPLNĚNO" : companyOptions[soldier.company].label
+                    render: (soldier: ISoldier) => !soldier.assignment || soldier.assignment.company === null ? "" : companyOptions[soldier.assignment.company].label
                 },
                 {
                     title: "Četa",
                     key: "platoon",
                     sorter: {
                         compare: (soldier1: ISoldier, soldier2: ISoldier) => {
-                            if (soldier1.platoon === null) return -1;
-                            return soldier1.platoon - (soldier2.platoon || 0)
+                            const
+                                plat1 = soldier1.assignment?.platoon,
+                                plat2 = soldier2.assignment?.platoon;
+                            if (typeof plat1 !== "number") return -1
+                            if (typeof plat2 !== "number") return 1
+                            return plat1 - plat2
                         },
                         multiple: 9,
                     },
                     filterOptions: platoonFiltrOptions,
                     filter(platoon: number, soldier: ISoldier) {
-                        return soldier.platoon === platoon;
+                        return soldier.assignment?.platoon === platoon;
                     },
-                    render: (soldier: ISoldier) => soldier.platoon === null ? "NEVYPLNĚNO" : platoonOptions[soldier.platoon].label
+                    render: (soldier: ISoldier) => !soldier.assignment || soldier.assignment.platoon === null ? "" : platoonOptions[soldier.assignment.platoon].label
                 },
                 {
                     title: "Družstvo",
                     key: "squad",
                     sorter: {
                         compare: (soldier1: ISoldier, soldier2: ISoldier) => {
-                            if (soldier1.squad === null) return -1;
-                            return soldier1.squad - (soldier2.squad || 0)
+                            const
+                                squad1 = soldier1.assignment?.squad,
+                                squad2 = soldier2.assignment?.squad
+
+                            if (typeof squad1 !== "number") return -1;
+                            if (typeof squad2 !== "number") return 1;
+                            return squad1 - squad2
                         },
                         multiple: 8,
                     },
                     filterOptions: squadFiltrOptions,
                     filter(squad: number, soldier: ISoldier) {
-                        return soldier.squad === squad;
+                        return soldier.assignment?.squad === squad;
                     },
-                    render: (soldier: ISoldier) => soldier.squad === null ? "NEVYPLNĚNO" : squadOptions[soldier.squad].label
+                    render: (soldier: ISoldier) => !soldier.assignment || soldier.assignment.squad === null ? "" : squadOptions[soldier.assignment.squad].label
                 },
                 {
                     title: "Lékařská prohlídka",
@@ -312,6 +322,16 @@ watch(filters, () => {
         (row: { rawNode: ISoldier }) => row.rawNode,
     );
 });
+
+function sortId(item1: { value: number | null }, item2: { value: number | null }) {
+    if (!item1.value) {
+        return -1
+    }
+    else if (!item2.value) {
+        return 1
+    }
+    return item1.value - item2.value
+}
 </script>
 
 <style lang="scss" scoped>

@@ -2,7 +2,7 @@ import { type INomination, type ISoldier, EAttendance, type IParking, type IDril
 
 
 // const apiBaseUrl = "http://0.0.0.0:8000/az/api/",
-const apiBaseUrl = "https://pecaj.fun/az/api/",
+  const apiBaseUrl = "https://pecaj.fun/az/api/",
 
   { loadingEnd, loadingStart } = useLayout();
 
@@ -351,7 +351,7 @@ export async function reactToNomination(
   data?: { accommodation?: IAccommodation; parking?: IParking },
 ) {
   const { accommodation, parking } = data || {},
-  body = { attendance, parking, accommodation }
+    body = { attendance, parking, accommodation }
 
   if (body.accommodation && attendance === EAttendance.Absent) {
     body.accommodation = undefined
@@ -417,4 +417,47 @@ function getBearerToken() {
     console.log("Nebyl nalezen token");
   }
   return "Bearer " + token;
+}
+
+export async function uploadSoldiers(soldiers: Array<any>, positions) {
+  loadingStart();
+  try {
+    return await (
+      await fetch(`${apiBaseUrl}soldiers/update`, {
+        method: "POST",
+        headers: {
+          Authorization: getBearerToken(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          soldiers,
+          positions
+        })
+      })
+    ).json();
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loadingEnd();
+  }
+}
+
+export async function uploadSoldiersExaminations(examinations: Array<any>) {
+  loadingStart();
+  try {
+    return await (
+      await fetch(`${apiBaseUrl}soldiers/update-examinations`, {
+        method: "POST",
+        headers: {
+          Authorization: getBearerToken(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(examinations)
+      })
+    ).json();
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loadingEnd();
+  }
 }

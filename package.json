@@ -15,10 +15,12 @@
     "@tiptap/vue-3": "^3.4.4",
     "naive-ui": "^2.41.0",
     "nuxt": "^3.13.0",
+    "papaparse": "^5.5.3",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
+    "@types/papaparse": "^5",
     "sass-embedded": "^1.78.0"
   },
   "packageManager": "yarn@4.6.0"
