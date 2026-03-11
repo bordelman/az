@@ -1896,6 +1896,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/papaparse@npm:^5":
+  version: 5.5.2
+  resolution: "@types/papaparse@npm:5.5.2"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/27b097b6f8f204b20ade1f2cbf4798eb38caa5fbfa3180fd0faa5e3f9aea371c1786ae180d56f3287556463eefe3100c953e316ea6ee99d7ae1d04111cfc9e50
+  languageName: node
+  linkType: hard
+
 "@types/parse-path@npm:^7.0.0":
   version: 7.0.3
   resolution: "@types/parse-path@npm:7.0.3"
@@ -5326,8 +5335,10 @@ __metadata:
     "@tiptap/extension-link": "npm:^3.4.4"
     "@tiptap/starter-kit": "npm:^3.4.4"
     "@tiptap/vue-3": "npm:^3.4.4"
+    "@types/papaparse": "npm:^5"
     naive-ui: "npm:^2.41.0"
     nuxt: "npm:^3.13.0"
+    papaparse: "npm:^5.5.3"
     sass-embedded: "npm:^1.78.0"
     vue: "npm:latest"
     vue-router: "npm:latest"
@@ -5574,6 +5585,13 @@ __metadata:
   version: 0.1.2
   resolution: "packrup@npm:0.1.2"
   checksum: 10c0/8236a89e02a86a1539ee7ff920050544f2abcdc74d1a4c16c6182ad23ca36b8b686adb2203f08ae23f422852d856ff7213e18411a7a3f1ac90b1f850b0b6e86d
+  languageName: node
+  linkType: hard
+
+"papaparse@npm:^5.5.3":
+  version: 5.5.3
+  resolution: "papaparse@npm:5.5.3"
+  checksum: 10c0/623aae6a35703308fd5a39d616fb3837231ebc70697346355ea508154d3f24df75b6554b736afc1924192205518a5db14e75f5e1cf35d154326050a37cdd9447
   languageName: node
   linkType: hard
 

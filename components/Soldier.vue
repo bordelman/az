@@ -8,8 +8,8 @@
         <section class="soldier" v-else-if="soldier.personalNumber">
             <div class="attributes">
                 <NTable striped>
-                    <tr v-if="logged.personalNumber === soldier.personalNumber">
-                        <td>Osobní číslo</td>
+                    <tr v-if="logged.personalNumber === soldier.personalNumber || logged.higherPermission">
+                        <td>Osobní číslo:</td>
                         <td><span v-if="!edit || !logged.higherPermission">{{ soldier.personalNumber }}</span>
                             <NInputNumber v-else v-model:value="soldier.personalNumber" :show-button="false"
                                 placeholder="Osobní číslo" />
@@ -62,7 +62,7 @@
                         </td>
                         <td><span v-if="!edit">{{ soldier.birthDate ? new
                             Date(soldier.birthDate).toLocaleDateString("cs") :
-                                ""}}</span>
+                            "" }}</span>
                             <NDatePicker v-else v-model:value="soldier.birthDate" placeholder="Datum narození"
                                 clearable />
                         </td>
@@ -76,16 +76,17 @@
                                 placeholder="Adresa trvalého bydliště" />
                         </td>
                     </tr>
-                    <tr :class="{missing: !soldier.medicalExaminationDue}">
+                    <tr :class="{ missing: !soldier.medicalExaminationDue }">
                         <td>
                             Pracovně lékařská prohlídka do:
                         </td>
                         <td>
                             <span v-if="!edit">
                                 {{
-                                     soldier.medicalExaminationDue ? new Date(soldier.medicalExaminationDue).toLocaleDateString(
-                                        "cs",
-                                    ) : "Chybí data"
+                                    soldier.medicalExaminationDue ? new
+                                        Date(soldier.medicalExaminationDue).toLocaleDateString(
+                                            "cs",
+                                        ) : "Chybí data"
                                 }}
                             </span>
                             <NDatePicker v-else v-model:value="soldier.medicalExaminationDue"
@@ -97,7 +98,7 @@
                             Zdravotní klasifikace:
                         </td>
                         <td>
-                            <span v-if="!edit || !logged.higherPermission">{{ soldier.medicalClasification }}</span>
+                            <span v-if="!edit || !logged.higherPermission">{{ medicalClasificationOptions[soldier.medicalClasification ?? 0].label }}</span>
                             <NSelect v-else v-model:value="soldier.medicalClasification"
                                 :options="medicalClasificationOptions" placeholder="Zdravotní klasifikace" />
                         </td>
@@ -130,39 +131,37 @@
                             Pozice:
                         </td>
                         <td>
-                            <span v-if="!edit || !logged.higherPermission">{{ soldier.position.position }}</span>
-                            <NSelect v-else v-model:value="soldier.position.id" :options="positionOptions"
-                                placeholder="Pozice" />
+                            <span>{{ soldier.assignment?.position.position }}</span>
                         </td>
                     </tr>
-                    <tr>
+                    <tr v-if="typeof soldier.assignment?.company === 'number'">
                         <td>
                             Rota:
                         </td>
                         <td>
-                            <span v-if="!edit || !logged.higherPermission">{{ companyOptions[soldier.company].label }}</span>
-                            <NSelect v-else v-model:value="soldier.company" :options="companyOptions"
-                                placeholder="Rota" />
+                            <span v-if="!edit || !logged.higherPermission">{{
+                                companyOptions[soldier.assignment.company].label
+                                }}</span>
                         </td>
                     </tr>
-                    <tr v-if="typeof soldier.platoon === 'number' || edit">
+                    <tr v-if="typeof soldier.assignment?.platoon === 'number'">
                         <td>
                             Četa:
                         </td>
                         <td>
-                            <span v-if="!edit || !logged.higherPermission">{{ platoonOptions[soldier.platoon].label }}</span>
-                            <NSelect v-else v-model:value="soldier.platoon" :options="platoonOptions"
-                                placeholder="Četa" />
+                            <span v-if="!edit || !logged.higherPermission">{{
+                                platoonOptions[soldier.assignment.platoon].label
+                                }}</span>
                         </td>
                     </tr>
-                    <tr v-if="typeof soldier.squad === 'number' || edit">
+                    <tr v-if="typeof soldier.assignment?.squad === 'number'">
                         <td>
                             Družstvo:
                         </td>
                         <td>
-                            <span v-if="!edit || !logged.higherPermission">{{ squadOptions[soldier.squad].label }}</span>
-                            <NSelect v-else v-model:value="soldier.squad" :options="squadOptions"
-                                placeholder="Družstvo" />
+                            <span v-if="!edit || !logged.higherPermission">{{
+                                squadOptions[soldier.assignment.squad].label
+                                }}</span>
                         </td>
                     </tr>
                     <tr>
@@ -368,9 +367,6 @@ const logged = useState<ISoldier>("logged"),
     });
 
 async function callEditSoldier() {
-    if (!soldier.value.platoon) soldier.value.platoon = null;
-    if (!soldier.value.squad) soldier.value.squad = null;
-
     try {
         Object.assign(
             soldier.value,
@@ -386,12 +382,9 @@ async function callEditSoldier() {
                 firstname: soldier.value.firstname,
                 lastname: soldier.value.lastname,
                 rank: { id: soldier.value.rank.id },
-                position: { id: soldier.value.position.id },
+                assignment: { id: soldier.value.assignment.id },
                 email: soldier.value.email,
                 mobile: soldier.value.mobile,
-                company: soldier.value.company,
-                platoon: soldier.value.platoon,
-                squad: soldier.value.squad,
                 medicalExaminationDue: parseDate(soldier.value.medicalExaminationDue),
                 medicalClasification: soldier.value.medicalClasification,
             }),

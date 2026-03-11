@@ -34,7 +34,7 @@
         </section>
         <section v-else>Nebyl jste nominován</section>
         <div>
-            <NButton v-if="logged.position.id === 69010" @click="toggleSquadFilter">{{ showSquad ? "Zobrazit všechny" :
+            <NButton v-if="logged.assignment?.position.id === 69010" @click="toggleSquadFilter">{{ showSquad ? "Zobrazit všechny" :
                 "Zobrazit pouze vlastní družstvo" }}</NButton>
         </div>
         <section class="lists">

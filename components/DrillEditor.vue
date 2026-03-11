@@ -62,7 +62,7 @@ import {
 } from "naive-ui";
 import type { RowData } from "naive-ui/es/data-table/src/interface";
 import type { PropType } from "vue";
-import type { IDrill, ISoldier } from "~/types";
+import { companyOptions, platoonOptions, squadOptions, type IDrill, type ISoldier } from "~/types";
 import { onBeforeUnmount, ref } from 'vue'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit';
@@ -104,35 +104,29 @@ const { drill, nominated } = defineProps({
   columns = computed(() => {
     const squadFiltrOptions = soldiers.value
       .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
-        if (!acc.some((soldier) => soldier.squad === currentValue.squad))
+        console.log({currentValue, acc});
+        
+        if (
+          !acc.some(
+            (soldier) => soldier.assignment?.squad === currentValue.assignment?.squad,
+          )
+        )
           acc.push(currentValue);
         return acc;
       }, [])
       .map((item) => {
         return {
-          label: item.squad,
-          value: item.squad,
+          label: !item.assignment || item.assignment.squad === null ? "NEVYPLNĚNO" : squadOptions[item.assignment.squad].label,
+          value: item.assignment?.squad ?? null,
         };
       })
-      .sort((item1, item2) => item1.value - item2.value),
+      .sort(sortId),
       platoonFiltrOptions = soldiers.value
-        .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
-          if (!acc.some((soldier) => soldier.platoon === currentValue.platoon))
-            acc.push(currentValue);
-          return acc;
-        }, [])
-        .map((item) => {
-          return {
-            label: item.platoon,
-            value: item.platoon,
-          };
-        })
-        .sort((item1, item2) => item1.value - item2.value),
-      positionFiltrOptions = soldiers.value
         .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
           if (
             !acc.some(
-              (soldier) => soldier.position.id === currentValue.position.id
+              (soldier) =>
+                soldier.assignment?.platoon === currentValue.assignment?.platoon,
             )
           )
             acc.push(currentValue);
@@ -140,14 +134,55 @@ const { drill, nominated } = defineProps({
         }, [])
         .map((item) => {
           return {
-            label: item.position.position,
-            value: item.position.id,
+            label: !item.assignment || item.assignment.platoon === null ? "NEVYPLNĚNO" : platoonOptions[item.assignment.platoon].label,
+            value: item.assignment?.platoon ?? null,
           };
         })
-        .sort((item1, item2) => item1.value - item2.value),
+        .sort(sortId),
+      companyFiltrOptions = soldiers.value
+        .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
+          if (
+            !acc.some(
+              (soldier) =>
+                soldier.assignment?.company === currentValue.assignment?.company,
+            )
+          )
+            acc.push(currentValue);
+          return acc;
+        }, [])
+        .map((item) => {
+          return {
+            label: !item.assignment || item.assignment.company === null ? "NEVYPLNĚNO" : companyOptions[item.assignment.company].label,
+            value: item.assignment?.company ?? null,
+          };
+        })
+        .sort(sortId),
+      positionFiltrOptions = soldiers.value
+        .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
+          if (
+            !acc.some(
+              (soldier) =>
+                soldier.assignment?.position.id === currentValue.assignment?.position.id,
+            )
+          )
+            acc.push(currentValue);
+          return acc;
+        }, [])
+        .map((item) => {
+          return {
+            label: item.assignment?.position.position ?? "Nevyplněno",
+            value: item.assignment?.position.id ?? null,
+          };
+        })
+        .sort(sortId),
       rankFiltrOptions = soldiers.value
         .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
-          if (!acc.some((soldier) => soldier.rank.id === currentValue.rank.id))
+          if (
+            !acc.some(
+              (soldier) =>
+                soldier.rank.id === currentValue.rank.id,
+            )
+          )
             acc.push(currentValue);
           return acc;
         }, [])
@@ -157,7 +192,7 @@ const { drill, nominated } = defineProps({
             value: item.rank.id,
           };
         })
-        .sort((item1, item2) => item1.value - item2.value);
+        .sort(sortId)
     return [
       {
         type: "selection",
@@ -204,40 +239,77 @@ const { drill, nominated } = defineProps({
         title: "Pozice",
         key: "position",
         render(soldier: ISoldier) {
-          return h("span", soldier.position.position);
+          return h("span", soldier.assignment?.position.position);
         },
-        sorter: (soldier1: ISoldier, soldier2: ISoldier) =>
-          soldier1.position.position.localeCompare(soldier2.position.position),
+        sorter: (soldier1: ISoldier, soldier2: ISoldier) => {
+          const pos1 = soldier1.assignment?.position.position,
+            pos2 = soldier2.assignment?.position.position;
+          if (!pos1) return -1;
+          if (!pos2) return 1;
+          return pos1.localeCompare(pos2)
+        },
         filterOptions: positionFiltrOptions,
         filter(position: number, soldier: ISoldier) {
-          return soldier.position.id === position;
+          return soldier.assignment?.position.id === position;
         },
+      },
+      {
+        title: "Rota",
+        key: "company",
+        sorter: {
+          compare: (soldier1: ISoldier, soldier2: ISoldier) => {
+            if (!soldier1.assignment?.company) return -1;
+            if (!soldier2.assignment?.company) return 1;
+            return soldier1.assignment.company - soldier2.assignment.company
+          },
+          multiple: 10,
+        },
+        filterOptions: companyFiltrOptions,
+        filter(company: number, soldier: ISoldier) {
+          return soldier.assignment?.company === company;
+        },
+        render: (soldier: ISoldier) => !soldier.assignment || soldier.assignment.company === null ? "" : companyOptions[soldier.assignment.company].label
       },
       {
         title: "Četa",
         key: "platoon",
         sorter: {
-          compare: (soldier1: ISoldier, soldier2: ISoldier) =>
-            (soldier1.platoon || 0) - (soldier2.platoon || 0),
+          compare: (soldier1: ISoldier, soldier2: ISoldier) => {
+            const
+              plat1 = soldier1.assignment?.platoon,
+              plat2 = soldier2.assignment?.platoon;
+            if (typeof plat1 !== "number") return -1
+            if (typeof plat2 !== "number") return 1
+            return plat1 - plat2
+          },
           multiple: 2,
         },
         filterOptions: platoonFiltrOptions,
         filter(platoon: number, soldier: ISoldier) {
-          return soldier.platoon === platoon;
+          return soldier.assignment?.platoon === platoon;
         },
+        render: (soldier: ISoldier) => !soldier.assignment || soldier.assignment.platoon === null ? "" : platoonOptions[soldier.assignment.platoon].label
       },
       {
         title: "Družstvo",
         key: "squad",
         sorter: {
-          compare: (soldier1: ISoldier, soldier2: ISoldier) =>
-            (soldier1.squad || 0) - (soldier2.squad || 0),
+          compare: (soldier1: ISoldier, soldier2: ISoldier) => {
+            const
+              squad1 = soldier1.assignment?.squad,
+              squad2 = soldier2.assignment?.squad
+
+            if (typeof squad1 !== "number") return -1;
+            if (typeof squad2 !== "number") return 1;
+            return squad1 - squad2
+          },
           multiple: 1,
         },
         filterOptions: squadFiltrOptions,
         filter(squad: number, soldier: ISoldier) {
-          return soldier.squad === squad;
+          return soldier.assignment?.squad === squad;
         },
+        render: (soldier: ISoldier) => !soldier.assignment || soldier.assignment.squad === null ? "" : squadOptions[soldier.assignment.squad].label
       },
       {
         title: "Lékařská prohlídka",
@@ -348,6 +420,16 @@ async function callCreateDrill() {
   } catch (error) {
     window.alert(error);
   }
+}
+
+function sortId(item1: { value: number | null | undefined }, item2: { value: number | null | undefined }) {
+  if (!item1.value) {
+    return -1
+  }
+  else if (!item2.value) {
+    return 1
+  }
+  return item1.value - item2.value
 }
 
 const toggleBold = () => {
