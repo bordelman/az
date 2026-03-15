@@ -46,6 +46,7 @@ export interface ISoldier {
   carBrand: string;
   carColor: string;
   carLicensePlate: string;
+  securityClearanceDue: Date;
 }
 
 export interface IAccommodation {
@@ -85,7 +86,8 @@ export const
     { label: "Podpora", value: 4 },
     { label: "Zabezpečení velení", value: 5 },
     { label: "Spojovací", value: 6 },
-    { label: "Logistika", value: 7 },
+    { label: "Ženijní", value: 7 },
+    { label: "Logistika", value: 8 },
   ],
   squadOptions = [
     { label: "Palebná podpora", value: 0 },

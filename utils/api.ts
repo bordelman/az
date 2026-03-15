@@ -461,3 +461,23 @@ export async function uploadSoldiersExaminations(examinations: Array<any>) {
     loadingEnd();
   }
 }
+
+export async function uploadSoldiersAssignments(assignments:Array<any>) {
+  loadingStart();
+  try {
+    return await (
+      await fetch(`${apiBaseUrl}soldiers/update-assignments`, {
+        method: "POST",
+        headers: {
+          Authorization: getBearerToken(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(assignments)
+      })
+    ).json();
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loadingEnd();
+  }
+}

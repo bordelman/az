@@ -76,6 +76,23 @@
                                 placeholder="Adresa trvalého bydliště" />
                         </td>
                     </tr>
+                    <tr :class="{ missing: !soldier.securityClearanceDue }">
+                        <td>
+                            Bezpečnostní prověrka do:
+                        </td>
+                        <td>
+                            <span v-if="!edit">
+                                {{
+                                    soldier.securityClearanceDue ? new
+                                        Date(soldier.securityClearanceDue).toLocaleDateString(
+                                            "cs",
+                                        ) : "Chybí data"
+                                }}
+                            </span>
+                            <NDatePicker v-else v-model:value="soldier.securityClearanceDue"
+                                placeholder="Bezpečnostní prověrka do" />
+                        </td>
+                    </tr>
                     <tr :class="{ missing: !soldier.medicalExaminationDue }">
                         <td>
                             Pracovně lékařská prohlídka do:
@@ -98,7 +115,8 @@
                             Zdravotní klasifikace:
                         </td>
                         <td>
-                            <span v-if="!edit || !logged.higherPermission">{{ medicalClasificationOptions[soldier.medicalClasification ?? 0].label }}</span>
+                            <span v-if="!edit || !logged.higherPermission">{{
+                                medicalClasificationOptions[soldier.medicalClasification ?? 0].label }}</span>
                             <NSelect v-else v-model:value="soldier.medicalClasification"
                                 :options="medicalClasificationOptions" placeholder="Zdravotní klasifikace" />
                         </td>
@@ -343,12 +361,6 @@ const logged = useState<ISoldier>("logged"),
     personalNumber = ref<string>(useRoute().params.personalNumber as string || logged.value?.personalNumber.toString()),
     { positions, ranks } = useSettings(),
     dialog = useDialog(),
-    positionOptions = Object.values(positions.value).map((position) => {
-        return {
-            label: position.position,
-            value: position.id,
-        };
-    }),
     rankOptions = Object.values(ranks.value).map((rank) => {
         return {
             label: rank.rank,
@@ -387,6 +399,7 @@ async function callEditSoldier() {
                 mobile: soldier.value.mobile,
                 medicalExaminationDue: parseDate(soldier.value.medicalExaminationDue),
                 medicalClasification: soldier.value.medicalClasification,
+                securityClearanceDue: soldier.value.securityClearanceDue || null
             }),
         );
         edit.value = false;

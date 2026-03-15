@@ -192,8 +192,8 @@ const table = ref(),
                     key: "company",
                     sorter: {
                         compare: (soldier1: ISoldier, soldier2: ISoldier) => {
-                            if (!soldier1.assignment?.company) return -1;
-                            if (!soldier2.assignment?.company) return 1;
+                            if (typeof soldier1.assignment?.company !== "number") return -1;
+                            if (typeof soldier2.assignment?.company !== "number") return 1;
                             return soldier1.assignment.company - soldier2.assignment.company
                         },
                         multiple: 10,
