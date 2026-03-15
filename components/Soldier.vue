@@ -214,102 +214,106 @@
             </NButton>
             <section class="drills">
                 <h2>Moje nominace</h2>
-                <section class="lists">
-                    <section class="attend">
-                        <h2>
-                            Zúčastním se
-                            <span class="count">({{ nominationsPresent.length }})</span>
-                        </h2>
-                        <ul class="nominations">
-                            <li class="nomination" v-for="(nomination, index) of nominationsPresent"
-                                :key="'nomination-' + index">
-                                <NuxtLink :class="[
-                                    'nomination-link',
-                                    EAttendance[nomination.status],
-                                ]" :to="'/drills/' + nomination.drill.id">
-                                    {{ nomination.drill.name }} ({{
-                                        new Date(
-                                            nomination.drill.dateFrom,
-                                        ).toLocaleDateString("cs")
-                                    }}
-                                    -
-                                    {{
-                                        new Date(
-                                            nomination.drill.dateTo,
-                                        ).toLocaleDateString("cs")
-                                    }})
-                                    <n-tooltip v-if="nomination.parking" trigger="hover">
-                                        <template #trigger>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor" viewBox="0 0 16 16">
-                                                <path
-                                                    d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.5 4.002h2.962C10.045 4.002 11 5.104 11 6.586c0 1.494-.967 2.578-2.55 2.578H6.784V12H5.5zm2.77 4.072c.893 0 1.419-.545 1.419-1.488s-.526-1.482-1.42-1.482H6.778v2.97z" />
-                                            </svg>
-                                        </template>
-                                        <div>{{ nomination.parking.brand }}</div>
-                                        <div>{{ nomination.parking.color }}</div>
-                                        <div>{{ nomination.parking.spz }}</div>
-                                    </n-tooltip>
-                                </NuxtLink>
-                            </li>
-                        </ul>
-                    </section>
-                    <section class="skipped">
-                        <h2>
-                            Nezúčastním se
-                            <span class="count">({{ nominationsAbsent.length }})</span>
-                        </h2>
-                        <ul class="nominations">
-                            <li class="nomination" v-for="(nomination, index) of nominationsAbsent"
-                                :key="'nomination-' + index">
-                                <NuxtLink :class="[
-                                    'nomination-link',
-                                    EAttendance[nomination.status],
-                                ]" :to="'/drills/' + nomination.drill.id">
-                                    {{ nomination.drill.name }} ({{
-                                        new Date(
-                                            nomination.drill.dateFrom,
-                                        ).toLocaleDateString("cs")
-                                    }}
-                                    -
-                                    {{
-                                        new Date(
-                                            nomination.drill.dateTo,
-                                        ).toLocaleDateString("cs")
-                                    }})
-                                </NuxtLink>
-                            </li>
-                        </ul>
-                    </section>
-                    <section class="not-responded">
-                        <h2>
-                            Nevyjádřil jsem se
-                            <span class="count">({{ nominationsNotResponded.length }})</span>
-                        </h2>
-                        <ul class="nominations">
-                            <li class="nomination" v-for="(
-nomination, index
-                            ) of nominationsNotResponded" :key="'nomination-' + index">
-                                <NuxtLink :class="[
-                                    'nomination-link',
-                                    EAttendance[nomination.status],
-                                ]" :to="'/drills/' + nomination.drill.id">
-                                    {{ nomination.drill.name }} ({{
-                                        new Date(
-                                            nomination.drill.dateFrom,
-                                        ).toLocaleDateString("cs")
-                                    }}
-                                    -
-                                    {{
-                                        new Date(
-                                            nomination.drill.dateTo,
-                                        ).toLocaleDateString("cs")
-                                    }})
-                                </NuxtLink>
-                            </li>
-                        </ul>
-                    </section>
-                </section>
+                <NCollapse>
+                    <NCollapseItem v-for="yearObj of nominationsPerYear" :title="`${yearObj.year} (${yearObj.totalDays})`"
+                        :name="yearObj.year">
+                        <section class="lists">
+                            <section class="attend">
+                                <h2>
+                                    Zúčastním se
+                                    <span class="count">({{ yearObj.present.length }})</span>
+                                </h2>
+                                <ul class="nominations">
+                                    <li class="nomination" v-for="(nomination, index) of yearObj.present"
+                                        :key="'nomination-' + index">
+                                        <NuxtLink :class="[
+                                            'nomination-link',
+                                            EAttendance[nomination.status],
+                                        ]" :to="'/drills/' + nomination.drill.id">
+                                            {{ nomination.drill.name }} ({{
+                                                new Date(
+                                                    nomination.drill.dateFrom,
+                                                ).toLocaleDateString("cs")
+                                            }}
+                                            -
+                                            {{
+                                                new Date(
+                                                    nomination.drill.dateTo,
+                                                ).toLocaleDateString("cs")
+                                            }})
+                                            <n-tooltip v-if="nomination.parking" trigger="hover">
+                                                <template #trigger>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.5 4.002h2.962C10.045 4.002 11 5.104 11 6.586c0 1.494-.967 2.578-2.55 2.578H6.784V12H5.5zm2.77 4.072c.893 0 1.419-.545 1.419-1.488s-.526-1.482-1.42-1.482H6.778v2.97z" />
+                                                    </svg>
+                                                </template>
+                                                <div>{{ nomination.parking.brand }}</div>
+                                                <div>{{ nomination.parking.color }}</div>
+                                                <div>{{ nomination.parking.spz }}</div>
+                                            </n-tooltip>
+                                        </NuxtLink>
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="skipped">
+                                <h2>
+                                    Nezúčastním se
+                                    <span class="count">({{ yearObj.absent.length }})</span>
+                                </h2>
+                                <ul class="nominations">
+                                    <li class="nomination" v-for="(nomination, index) of yearObj.absent"
+                                        :key="'nomination-' + index">
+                                        <NuxtLink :class="[
+                                            'nomination-link',
+                                            EAttendance[nomination.status],
+                                        ]" :to="'/drills/' + nomination.drill.id">
+                                            {{ nomination.drill.name }} ({{
+                                                new Date(
+                                                    nomination.drill.dateFrom,
+                                                ).toLocaleDateString("cs")
+                                            }}
+                                            -
+                                            {{
+                                                new Date(
+                                                    nomination.drill.dateTo,
+                                                ).toLocaleDateString("cs")
+                                            }})
+                                        </NuxtLink>
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="not-responded">
+                                <h2>
+                                    Nevyjádřil jsem se
+                                    <span class="count">({{ yearObj.notResponded.length }})</span>
+                                </h2>
+                                <ul class="nominations">
+                                    <li class="nomination" v-for="(nomination, index) of yearObj.notResponded"
+                                        :key="'nomination-' + index">
+                                        <NuxtLink :class="[
+                                            'nomination-link',
+                                            EAttendance[nomination.status],
+                                        ]" :to="'/drills/' + nomination.drill.id">
+                                            {{ nomination.drill.name }} ({{
+                                                new Date(
+                                                    nomination.drill.dateFrom,
+                                                ).toLocaleDateString("cs")
+                                            }}
+                                            -
+                                            {{
+                                                new Date(
+                                                    nomination.drill.dateTo,
+                                                ).toLocaleDateString("cs")
+                                            }})
+                                        </NuxtLink>
+                                    </li>
+                                </ul>
+                            </section>
+                        </section>
+                    </NCollapseItem>
+                </NCollapse>
             </section>
             <NModal v-model:show="showNewPasswordModal" class="custom-card" preset="card"
                 :style="{ width: '500px', maxWidth: '80vw' }" title="Nové heslo" :bordered="false" size="huge">
@@ -338,6 +342,8 @@ nomination, index
 <script setup lang="ts">
 import {
     NButton,
+    NCollapseItem,
+    NCollapse,
     NDatePicker,
     NInput,
     NInputNumber,
@@ -359,7 +365,7 @@ import {
 const logged = useState<ISoldier>("logged"),
     edit = ref(false),
     personalNumber = ref<string>(useRoute().params.personalNumber as string || logged.value?.personalNumber.toString()),
-    { positions, ranks } = useSettings(),
+    { ranks } = useSettings(),
     dialog = useDialog(),
     rankOptions = Object.values(ranks.value).map((rank) => {
         return {
@@ -368,6 +374,7 @@ const logged = useState<ISoldier>("logged"),
         };
     }),
     soldier = ref<ISoldier | null>(null),
+    nominationsPerYear = ref<Array<{ year: number, totalDays: number, absent: Array<INomination>, notResponded: Array<INomination>, present: Array<INomination> }>>([]),
     nominationsAbsent = ref<Array<INomination>>([]),
     nominationsNotResponded = ref<Array<INomination>>([]),
     nominationsPresent = ref<Array<INomination>>([]),
@@ -381,25 +388,25 @@ const logged = useState<ISoldier>("logged"),
 async function callEditSoldier() {
     try {
         Object.assign(
-            soldier.value,
+            soldier.value || {},
             await editSoldier({
                 birthDate: parseDate(soldier.value?.birthDate),
                 carBrand: soldier.value?.carBrand || null,
                 carColor: soldier.value?.carColor || null,
                 carLicensePlate: soldier.value?.carLicensePlate || null,
                 permanentAddress: soldier.value?.permanentAddress || null,
-                titleAfter: soldier.value.titleAfter || null,
-                titleBefore: soldier.value.titleBefore || null,
-                personalNumber: soldier.value.personalNumber,
-                firstname: soldier.value.firstname,
-                lastname: soldier.value.lastname,
-                rank: { id: soldier.value.rank.id },
-                assignment: { id: soldier.value.assignment.id },
-                email: soldier.value.email,
-                mobile: soldier.value.mobile,
-                medicalExaminationDue: parseDate(soldier.value.medicalExaminationDue),
-                medicalClasification: soldier.value.medicalClasification,
-                securityClearanceDue: soldier.value.securityClearanceDue || null
+                titleAfter: soldier.value?.titleAfter || null,
+                titleBefore: soldier.value?.titleBefore || null,
+                personalNumber: soldier.value?.personalNumber,
+                firstname: soldier.value?.firstname,
+                lastname: soldier.value?.lastname,
+                rank: { id: soldier.value?.rank.id },
+                assignment: { id: (soldier.value?.assignment || {}).id },
+                email: soldier.value?.email,
+                mobile: soldier.value?.mobile,
+                medicalExaminationDue: parseDate(soldier.value?.medicalExaminationDue),
+                medicalClasification: soldier.value?.medicalClasification,
+                securityClearanceDue: soldier.value?.securityClearanceDue || null
             }),
         );
         edit.value = false;
@@ -475,6 +482,35 @@ onMounted(async () => {
             window.alert("nominations " + nominations)
             window.alert("nominations parsed: " + JSON.stringify(nominations))
         }
+
+        for (const nomination of nominations) {
+            const year = new Date(nomination.drill.dateFrom).getFullYear(),
+                yearObject = nominationsPerYear.value.find(item => item.year === year) ?? {
+                    totalDays: 0,
+                    year,
+                    absent: [] as Array<INomination>,
+                    notResponded: [] as Array<INomination>,
+                    present: [] as Array<INomination>
+                }
+
+            if (!nominationsPerYear.value.some(list => list.year === year)) {
+                nominationsPerYear.value.push(yearObject)
+            }
+            if (nomination.status === EAttendance.Absent) {
+                yearObject.absent.push(nomination)
+            } else if (nomination.status === EAttendance.NotResponded) {
+                yearObject.notResponded.push(nomination)
+            } else if (nomination.status === EAttendance.Present) {
+                const from = new Date(nomination.drill.dateFrom).getTime();
+                const to = new Date(nomination.drill.dateTo).getTime();
+
+                yearObject.totalDays += (to - from)/ (1000 * 60 * 60 * 24) + 1;
+                
+                yearObject.present.push(nomination)
+            }
+        }
+
+        nominationsPerYear.value = nominationsPerYear.value.sort((listA, listB) => listB.year - listA.year)
 
         soldier.value = (soldiersArr || [])[0];
         nominationsNotResponded.value = (nominations || []).filter(

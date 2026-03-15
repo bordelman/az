@@ -65,7 +65,7 @@ const handleFileUpload = (event: Event) => {
 			}
 		});
 	};
-	reader.readAsText(file, 'utf-8');
+	reader.readAsText(file, 'windows-1250');
 };
 
 const processRow = (row: any) => {
