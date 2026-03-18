@@ -28,15 +28,17 @@
         </div>
       </div>
       <div class="input-row">
-        <label for="additionlaInfo">Nabídnout ubytování</label>
+        <label for="offerAccommodation">Nabídnout ubytování</label>
         <NCheckbox id="offerAccommodation" :checked-value="1" :unchecked-value="0"
           v-model:checked="drillSrc.offerAccommodation" />
       </div>
     </div>
-    <NButton :disabled="!drillSrc.dateFrom || !drillSrc.dateTo" @click="showSoldierSelector = true">
+    <input :disabled="actionsDisabled" type="file" accept=".csv" @change="handleFileUpload" />
+    <NButton :disabled="actionsDisabled" @click="showSoldierSelector = true">
       Vybrat vojáky{{ nominatedSoldiers.length ? ` (${nominatedSoldiers.length})` : '' }}
     </NButton>
-    <NButton :disabled="!drillSrc.dateFrom || !drillSrc.dateTo" @click="callCreateDrill">Uložit</NButton>
+
+    <NButton :disabled="actionsDisabled" @click="callCreateDrill">Uložit</NButton>
     <NModal v-model:show="showSoldierSelector" class="custom-card" preset="card"
       :style="{ maxWidth: '80vw', maxHeight: '80vh' }" title="Nominace" :bordered="false" size="huge">
       <NDataTable striped :columns="columns" :data="soldiers" :row-key="(row: RowData) => row.personalNumber"
@@ -67,6 +69,7 @@ import { onBeforeUnmount, ref } from 'vue'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import Papa from 'papaparse';
 
 onBeforeUnmount(() => {
   editor.value.destroy()
@@ -101,11 +104,10 @@ const { drill, nominated } = defineProps({
       ? new Date(drillSrc.value.dateTo).getTime()
       : undefined
   ),
+  actionsDisabled = computed(() => !drillSrc.value.dateFrom || !drillSrc.value.dateTo || isProcessing.value || !drillSrc.value.name || !drillSrc.value.returnDate),
   columns = computed(() => {
     const squadFiltrOptions = soldiers.value
       .reduce((acc: Array<ISoldier>, currentValue: ISoldier) => {
-        console.log({currentValue, acc});
-        
         if (
           !acc.some(
             (soldier) => soldier.assignment?.squad === currentValue.assignment?.squad,
@@ -365,7 +367,8 @@ const { drill, nominated } = defineProps({
         drillSrc.value.additionalInfo = editor.getHTML()
       },
     })
-  )
+  ),
+  isProcessing = ref(false)
 
 
 function handleCheck(rowKeys: DataTableRowKey[]) {
@@ -392,7 +395,12 @@ function updateDateRange() {
 }
 
 function isDateDisabled(ts: number) {
-  return ts < dateRange.value[0] || ts > dateRange.value[1];
+  const [fromSrc, toSrc] = dateRange.value,
+    from = (new Date(fromSrc).setHours(0, 0, 0, 0)),
+    to = (new Date(toSrc).setHours(23, 59, 59, 999));
+
+
+  return ts < from || ts > to;
 }
 
 function updateReturnDate() {
@@ -431,6 +439,38 @@ function sortId(item1: { value: number | null | undefined }, item2: { value: num
   }
   return item1.value - item2.value
 }
+
+const handleFileUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement,
+    file = target.files?.[0],
+    HeadersMap: Record<string, string> = {
+      'Osobní číslo': 'personalNumber'
+    };
+  if (!file) return;
+
+  isProcessing.value = true;
+
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    const content = e.target?.result as string;
+
+    Papa.parse(content, {
+      header: true,
+      delimiter: ";",
+      skipEmptyLines: true,
+      transformHeader: (header) => {
+        const clean = header.trim();
+        return HeadersMap[clean] || clean;
+      },
+      complete: (results) => {
+        nominatedSoldiers.value = results.data.map((row: any) => Number.parseInt(row[HeadersMap["Osobní číslo"]]));
+        isProcessing.value = false;
+      }
+    });
+  };
+  reader.readAsText(file, 'utf-8');
+};
 
 const toggleBold = () => {
   editor.value.chain().focus().toggleBold().run()

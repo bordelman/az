@@ -77,7 +77,7 @@ const handleFileUpload = (event: Event) => {
 	};
 
 	// Na FE řešíme kódování přímo v readeru
-	reader.readAsText(file, 'windows-1250');
+	reader.readAsText(file, 'utf-8');
 };
 
 const processRow = (row: any) => {

@@ -481,3 +481,23 @@ export async function uploadSoldiersAssignments(assignments:Array<any>) {
     loadingEnd();
   }
 }
+
+export async function uploadSoldiersClearances(clearances:Array<any>) {
+  loadingStart();
+  try {
+    return await (
+      await fetch(`${apiBaseUrl}soldiers/update-clearances`, {
+        method: "POST",
+        headers: {
+          Authorization: getBearerToken(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(clearances)
+      })
+    ).json();
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loadingEnd();
+  }
+}

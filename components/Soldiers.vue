@@ -1,5 +1,6 @@
 <template>
     <div class="soldier">
+        <NInput type="text" v-model:value="term" />
         <div class="clear-button">
             <NButton v-if="filters" @click="clearFilters">Restartovat filtry</NButton>
             <NButton v-if="sorters" @click="clearSorter">Restartovat řazení</NButton>
@@ -16,6 +17,7 @@
 import {
     NButton,
     NDataTable,
+    NInput,
     type DataTableColumns,
     type DataTableFilterState,
     type DataTableSortState
@@ -28,14 +30,15 @@ import {
     platoonOptions,
     squadOptions
 } from "~/types"
+import * as _ from "lodash-es"
 
 const table = ref(),
     filters = ref(),
     sorters = ref(),
+    term = ref(""),
     logged = useState<ISoldier>("logged"),
-    soldiers: Ref<Array<ISoldier>> = ref(
-        await getSoldiers({}),
-    ),
+    soldiersSrc = await getSoldiers({}),
+    soldiers: Ref<Array<ISoldier>> = ref(_.cloneDeep(soldiersSrc)),
     filteredSoldiers: Ref<Array<ISoldier>> = ref(soldiers.value),
     columns = computed((): DataTableColumns => {
         const squadFiltrOptions = filteredSoldiers.value
@@ -274,9 +277,39 @@ const table = ref(),
                         );
                     },
                 },
+                {
+                    title: "Bezpečnostní prohlídka",
+                    key: "securityClearanceDue",
+                    sorter: (soldier1: ISoldier, soldier2: ISoldier) => {
+                        return new Date(soldier1.securityClearanceDue).getTime() - new Date(soldier2.securityClearanceDue).getTime()
+                    },
+                    filterOptions: [
+                        {
+                            label: "K dnešnímu datu",
+                            value: Date.now(),
+                        },
+                    ],
+                    filter(value: number, soldier: ISoldier) {
+                        if (!soldier.securityClearanceDue) return false;
+                        return (
+                            new Date(soldier.securityClearanceDue).getTime() >=
+                            value
+                        );
+                    },
+                    render(soldier: ISoldier) {
+                        return h(
+                            "span",
+                            soldier.securityClearanceDue ?
+                                new Date(
+                                    soldier.securityClearanceDue,
+                                ).toLocaleDateString("cs") : "NEVYPLNĚNO",
+                        );
+                    },
+                },
             ];
 
         if (!logged.value.higherPermission) {
+            columns.pop();
             columns.pop();
             columns.shift();
         }
@@ -296,6 +329,7 @@ const table = ref(),
 
 function clearFilters() {
     table.value.filter(null);
+    term.value="";
     filters.value = null;
 }
 
@@ -322,6 +356,19 @@ watch(filters, () => {
         (row: { rawNode: ISoldier }) => row.rawNode,
     );
 });
+
+watch(term, (value) => {
+    if (value) {
+        soldiers.value = soldiersSrc.filter(soldier => findMatch(soldier.firstname, value) || findMatch(soldier.lastname, value) || soldier.personalNumber?.toString().includes(value))
+    }   
+    else {
+        soldiers.value = _.cloneDeep(soldiersSrc)
+    }
+});
+
+function findMatch(src: string, value: string): boolean {
+    return src.toLocaleLowerCase().includes(value.toLocaleLowerCase())
+}
 
 function sortId(item1: { value: number | null }, item2: { value: number | null }) {
     if (!item1.value) {
