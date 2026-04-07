@@ -278,7 +278,7 @@ const table = ref(),
                     },
                 },
                 {
-                    title: "Bezpečnostní prohlídka",
+                    title: "Bezpečnostní prověrka",
                     key: "securityClearanceDue",
                     sorter: (soldier1: ISoldier, soldier2: ISoldier) => {
                         return new Date(soldier1.securityClearanceDue).getTime() - new Date(soldier2.securityClearanceDue).getTime()

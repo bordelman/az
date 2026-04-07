@@ -14,13 +14,16 @@
         <NuxtLink v-if="logged.higherPermission" to="/drills/new">
           Založit cvičení
         </NuxtLink>
+        <NuxtLink v-if="logged.higherPermission" to="/administration">
+          Administrace
+        </NuxtLink>
       </div>
       <div class="bottom">
         <div v-if="logged.personalNumber !== 1" class="logged-soldier">
           {{ logged.rank.abbreviation }}. {{ logged.firstname }}
-          {{ logged.lastname }}, {{ logged.position.position }} ({{
-            logged.company
-          }}/{{ logged.platoon || "_" }}/{{ logged.squad || "_" }})
+          {{ logged.lastname }}, {{ logged.assignment?.position.position }} ({{
+            logged.assignment?.company
+          }}/{{ logged.assignment?.platoon || "_" }}/{{ logged.assignment?.squad || "_" }})
         </div>
         <div v-else>
           Admin

@@ -167,8 +167,8 @@ const { isLoading } = useLayout(),
             .filter((nomination) => nomination.status === EAttendance.Present)
             .filter((nomination) => {
                 if (showSquad.value) {
-                    const { company, platoon, squad } = nomination.soldier
-                    return company === logged.value.company && platoon === logged.value.platoon && squad === logged.value.squad
+                    const { company, platoon, squad } = nomination.soldier.assignment || {}
+                    return company === logged.value.assignment?.company && platoon === logged.value.assignment?.platoon && squad === logged.value.assignment?.squad
                 }
                 return true
             })
@@ -181,8 +181,8 @@ const { isLoading } = useLayout(),
             .filter((nomination) => nomination.status === EAttendance.Absent)
             .filter((nomination) => {
                 if (showSquad.value) {
-                    const { company, platoon, squad } = nomination.soldier
-                    return company === logged.value.company && platoon === logged.value.platoon && squad === logged.value.squad
+                    const { company, platoon, squad } = nomination.soldier.assignment || {}
+                    return company === logged.value.assignment?.company && platoon === logged.value.assignment?.platoon && squad === logged.value.assignment?.squad
                 }
                 return true
             })
@@ -195,8 +195,8 @@ const { isLoading } = useLayout(),
             .filter((nomination) => nomination.status === EAttendance.NotResponded)
             .filter((nomination) => {
                 if (showSquad.value) {
-                    const { company, platoon, squad } = nomination.soldier
-                    return company === logged.value.company && platoon === logged.value.platoon && squad === logged.value.squad
+                    const { company, platoon, squad } = nomination.soldier.assignment || {}
+                    return company === logged.value.assignment?.company && platoon === logged.value.assignment?.platoon && squad === logged.value.assignment?.squad
                 }
                 return true
             })

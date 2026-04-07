@@ -1,6 +1,6 @@
 <template>
 	<div class="p-4 border rounded shadow-sm">
-		<h3 class="mb-4">Import stavu lékařských prohlídek</h3>
+		<h3 class="mb-4">Import zařazovací listiny</h3>
 
 		<input type="file" accept=".csv" @change="handleFileUpload" :disabled="isProcessing"
 			class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
@@ -9,16 +9,20 @@
 			Zpracovávám soubor...
 		</div>
 
-		<div v-if="examinations.length > 0" class="mt-6">
-			<p class="text-green-600 font-bold">Nalezeno {{ examinations.length }} záznamů</p>
+		<pre>
+			{{ dataOk }}
+		</pre>
+		<div v-if="assignment.length > 0" class="mt-6">
+			<p class="text-green-600 font-bold">Nalezeno {{ assignment.length }} záznamů</p>
 
-			<button @click="sendToBackend" class="mt-4 bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
+			<button :disabled="!dataOk" @click="sendToBackend"
+				class="mt-4 bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
 				Odeslat na server
 			</button>
 
 			<details class="mt-4">
 				<summary class="cursor-pointer text-blue-500 underline">Zobrazit náhled dat</summary>
-				<pre class="bg-gray-100 p-2 mt-2 text-xs overflow-auto max-h-60">{{ examinations.slice(0, 5) }}</pre>
+				<pre class="bg-gray-100 p-2 mt-2 text-xs overflow-auto max-h-60">{{ assignment.slice(0, 5) }}</pre>
 			</details>
 		</div>
 	</div>
@@ -28,12 +32,16 @@
 import { ref } from 'vue';
 import Papa from 'papaparse';
 
+
 const HeadersMap: Record<string, string> = {
 	'Osobní číslo': 'personalNumber',
-	'Následná prohlídka': 'medicalExaminationDue'
+	'unikátní kod pozice': 'assignmentId',
+	'Název': 'positionId'
 },
 	isProcessing = ref(false),
-	examinations = ref([]);
+	assignment = ref([]),
+	{ positions } = useSettings(),
+	dataOk = ref(false);
 
 const handleFileUpload = (event: Event) => {
 	const target = event.target as HTMLInputElement;
@@ -56,9 +64,8 @@ const handleFileUpload = (event: Event) => {
 				return HeadersMap[clean] || clean;
 			},
 			complete: (results) => {
-				examinations.value = results.data.map((row: any) => processRow(row)).filter((row: any) => row.personalNumber);
+				assignment.value = results.data.map((row: any) => processRow(row)).filter((row: any) => row.personalNumber && row.positionId);
 				isProcessing.value = false;
-				console.log("Parsování hotovo", examinations.value);
 			}
 		});
 	};
@@ -70,23 +77,21 @@ const processRow = (row: any) => {
 	for (const [key, value] of Object.entries(row)) {
 		const val = String(value).trim();
 
-		if (key === HeadersMap["Osobní číslo"]) {
+		if ([HeadersMap["Osobní číslo"], HeadersMap["unikátní kod pozice"]].includes(key)) {
 			processed[key] = parseInt(val, 10) || null;
 		}
-		else {
-			const [day, month, year] = val.split(".");
-
-			processed[key] = val ? new Date(Number.parseInt(year), Number.parseInt(month) - 1, Number.parseInt(day)) : null;
+		else if (key === HeadersMap["Název"]) {
+			processed[key] = (positions.value.find(position => position.position === val) || {}).id
 		}
 	}
 	return processed;
 };
 
 const sendToBackend = async () => {
-	const { processed } = await uploadSoldiersExaminations(examinations.value);
+	const { processed } = await uploadSoldiersAssignments(assignment.value);
 	if (processed) {
 		window.alert("Zpracováno");
-		examinations.value = [];
+		assignment.value = [];
 	}
 	else {
 		window.alert("Chyba importu")

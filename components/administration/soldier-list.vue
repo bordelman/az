@@ -1,6 +1,6 @@
 <template>
 	<div class="p-4 border rounded shadow-sm">
-		<h3 class="mb-4">Import stavu bezpečnostní prověrky</h3>
+		<h3 class="mb-4">Import vojáků</h3>
 
 		<input type="file" accept=".csv" @change="handleFileUpload" :disabled="isProcessing"
 			class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
@@ -9,8 +9,8 @@
 			Zpracovávám soubor...
 		</div>
 
-		<div v-if="clearances.length > 0" class="mt-6">
-			<p class="text-green-600 font-bold">Nalezeno {{ clearances.length }} záznamů</p>
+		<div v-if="soldiers.length > 0" class="mt-6">
+			<p class="text-green-600 font-bold">Nalezeno {{ soldiers.length }} záznamů</p>
 
 			<button @click="sendToBackend" class="mt-4 bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
 				Odeslat na server
@@ -18,7 +18,7 @@
 
 			<details class="mt-4">
 				<summary class="cursor-pointer text-blue-500 underline">Zobrazit náhled dat</summary>
-				<pre class="bg-gray-100 p-2 mt-2 text-xs overflow-auto max-h-60">{{ clearances.slice(0, 5) }}</pre>
+				<pre class="bg-gray-100 p-2 mt-2 text-xs overflow-auto max-h-60">{{ soldiers.slice(0, 5) }}</pre>
 			</details>
 		</div>
 	</div>
@@ -29,11 +29,23 @@ import { ref } from 'vue';
 import Papa from 'papaparse';
 
 const HeadersMap: Record<string, string> = {
-	'Kód SM': 'assignmentId',
-	'Platnost osvědčení, oznámení, dokladu od - do': 'clearance'
+	'KČÚ': 'UCN',
+	'Pozice': 'positionId',
+	'Osobní číslo': 'personalNumber',
+	'Hodnost': 'rankId',
+	'Titul před': 'titleBefore',
+	'Jméno': 'firstname',
+	'Příjmení': 'lastname',
+	'Titul za': 'titleAfter',
+	'Telefon': 'phone',
+	'Mobil': 'mobile',
+	'E-mail': 'email',
+	'Datová schránka': 'dataBox'
 },
-	isProcessing = ref(false),
-	clearances = ref([]);
+	{ ranks } = useSettings(),
+	soldiers = ref<any[]>([]),
+	positions = ref<Record<number, string>>({}),
+	isProcessing = ref(false);
 
 const handleFileUpload = (event: Event) => {
 	const target = event.target as HTMLInputElement;
@@ -41,6 +53,7 @@ const handleFileUpload = (event: Event) => {
 	if (!file) return;
 
 	isProcessing.value = true;
+	positions.value = {};
 
 	const reader = new FileReader();
 
@@ -56,12 +69,12 @@ const handleFileUpload = (event: Event) => {
 				return HeadersMap[clean] || clean;
 			},
 			complete: (results) => {
-				clearances.value = results.data.map((row: any) => processRow(row)).filter((row: any) => row.clearance);
+				soldiers.value = results.data.map((row: any) => processRow(row));
 				isProcessing.value = false;
-				console.log("Parsování hotovo", clearances.value);
 			}
 		});
 	};
+
 	reader.readAsText(file, 'utf-8');
 };
 
@@ -70,26 +83,42 @@ const processRow = (row: any) => {
 	for (const [key, value] of Object.entries(row)) {
 		const val = String(value).trim();
 
-		if (key === HeadersMap["Kód SM"]) {
+		if (key === HeadersMap["KČÚ"] || key === HeadersMap["Osobní číslo"]) {
 			processed[key] = parseInt(val, 10) || null;
 		}
-		else {
-			const due = val.split("\n")[1];
-			if (due) {
-				const [day, month, year] = due.split(".");
+		else if (key === 'positionId') {
+			const [id, ...rest] = val.split('-');
+			const parsedId = parseInt(id.trim(), 10);
+			const label = rest.join('-').trim();
 
-				processed[key] = val ? new Date(Number.parseInt(year), Number.parseInt(month) - 1, Number.parseInt(day)) : null;
+			if (!isNaN(parsedId)) {
+				positions.value[parsedId] = label;
+				processed[key] = parsedId;
 			}
+		}
+		else if (key === HeadersMap.Hodnost) {
+			const rank = ranks.value.find(rank => rank.abbreviation === val.replace('.', '').trim())
+
+			if (rank) {
+			processed[key] = rank.id
+			}
+			else {
+				console.log(val);
+			}
+		}
+		else {
+			processed[key] = val || null;
 		}
 	}
 	return processed;
 };
 
 const sendToBackend = async () => {
-	const { processed } = await uploadSoldiersClearances(clearances.value);
+	const {processed} = await uploadSoldiers(soldiers.value, positions.value);
 	if (processed) {
 		window.alert("Zpracováno");
-		clearances.value = [];
+		soldiers.value = [];
+		positions.value = [];
 	}
 	else {
 		window.alert("Chyba importu")
