@@ -317,7 +317,7 @@ const table = ref(),
         return columns;
     }),
     rowProps = (row: ISoldier) => {
-        if (logged.value.higherPermission) {
+        if (logged.value.rank.id >= 3) {
             return {
                 style: "cursor: pointer;",
                 onClick: () => {
@@ -329,7 +329,7 @@ const table = ref(),
 
 function clearFilters() {
     table.value.filter(null);
-    term.value="";
+    term.value = "";
     filters.value = null;
 }
 
@@ -360,7 +360,7 @@ watch(filters, () => {
 watch(term, (value) => {
     if (value) {
         soldiers.value = soldiersSrc.filter(soldier => findMatch(soldier.firstname, value) || findMatch(soldier.lastname, value) || soldier.personalNumber?.toString().includes(value))
-    }   
+    }
     else {
         soldiers.value = _.cloneDeep(soldiersSrc)
     }
