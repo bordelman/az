@@ -16,7 +16,7 @@
                                 </div>
                                 <div class="row">
                                     <n-input v-model:value="password" type="password" show-password-on="mousedown"
-                                        placeholder="Heslo" />
+                                        placeholder="Heslo" @keyup.enter="logIn(login, password)"/>
                                 </div>
                                 <NButton :disabled="!password || !login" @click="logIn(login, password)">
                                     Přihlásit

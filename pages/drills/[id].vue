@@ -21,22 +21,23 @@
         <NCard v-if="drill.additionalInfo" title="Dodatečné informace">
             <div class="additional-info" v-html="drill.additionalInfo" />
         </NCard>
-        <!-- <section class="additional-info">
-      <a href="">Dodatečné info</a>
-    </section> -->
-        <section v-if="nominated.includes(logged.personalNumber)" class="controll-panel">
-            <NButton ghost type="primary" v-if="!alreadyIn" @click="showParkingModal = true">
-                Zúčastním se
-            </NButton>
-            <NButton ghost type="error" v-if="!alreadyAbsent" class="negative" @click="removeMe">
-                Nezúčastním se
-            </NButton>
+        <section class="controll-panel">
+            <template v-if="nominated.includes(logged.personalNumber)">
+                <NButton ghost type="primary" v-if="!alreadyIn" @click="showParkingModal = true">
+                    Zúčastním se
+                </NButton>
+                <NButton ghost type="error" v-if="!alreadyAbsent" class="negative" @click="removeMe">
+                    Nezúčastním se
+                </NButton>
+            </template>
+            <NButton v-if="nominated.includes(logged.personalNumber)" @click="showExcuseModal = true">Připravit
+                omluvný email</NButton>
+            <section v-else>Nebyl jste nominován</section>
+            <div>
+                <NButton v-if="logged.assignment?.position.id === 69010" @click="toggleSquadFilter">
+                    {{ showSquad ? "Zobrazit všechny" : "Zobrazit pouze vlastní družstvo" }}</NButton>
+            </div>
         </section>
-        <section v-else>Nebyl jste nominován</section>
-        <div>
-            <NButton v-if="logged.assignment?.position.id === 69010" @click="toggleSquadFilter">{{ showSquad ? "Zobrazit všechny" :
-                "Zobrazit pouze vlastní družstvo" }}</NButton>
-        </div>
         <section class="lists">
             <section class="attendents">
                 <h2>
@@ -142,11 +143,25 @@
                 Zúčastním se
             </NButton>
         </NModal>
+        <NModal v-model:show="showExcuseModal" preset="card" :style="{ maxWidth: '600px', width: '80vw' }">
+            <NSpace vertical>
+                <NInput v-model:value="excuseRecipient" disabled />
+                <NInput v-model:value="excuseSubject" placeholder="Předmět" />
+                <NInput v-model:value="excuseBody" type="textarea" placeholder="Text omluvného emailu"
+                    :autosize="{ minRows: 4 }" />
+            </NSpace>
+            <template #action>
+                <NSpace justify="end">
+                    <NButton tag="a" :href="mailto">Otevřít v mailové aplikaci</NButton>
+                    <NButton @click="showExcuseModal = false" type="error">Zavřít</NButton>
+                </NSpace>
+            </template>
+        </NModal>
     </section>
 </template>
 
 <script setup lang="ts">
-import { NButton, NCard, NCheckbox, NDatePicker, NInput, NModal, NTooltip } from "naive-ui";
+import { NButton, NCard, NCheckbox, NDatePicker, NInput, NModal, NSpace, NTooltip } from "naive-ui";
 import { EAttendance, type IParking, type ISoldier } from "~/types";
 
 const { isLoading } = useLayout(),
@@ -154,6 +169,7 @@ const { isLoading } = useLayout(),
     myId = logged.value.personalNumber,
     { id } = useRoute().params as unknown as { id: string },
     showParkingModal = ref(false),
+    showExcuseModal = ref(false),
     drill = ref((await getDrills({ id }))[0]),
     nominations = ref(await getDrillNominations(id)),
     showSquad = ref(false),
@@ -222,7 +238,16 @@ const { isLoading } = useLayout(),
     parkingRequest = ref(!!myNomination.value?.parking),
     accommodationRequest = ref(!!myNomination.value?.accommodation),
     accommodation = ref(myNomination.value?.accommodation),
-    parking: Ref = ref(myNomination.value?.parking);
+    parking: Ref = ref(myNomination.value?.parking),
+    excuseRecipient = 'Helena.Bila@mo.gov.cz',
+    excuseSubject = ref('Žádost o omluvení z vojenského cvičení ' + drill.value.name),
+    excuseBody = ref(`Dobrý den,
+
+žádám o omluvení z vojenského cvičení "${drill.value.name}" konaného dne ${new Date(drill.value.dateFrom).toLocaleDateString('cs-CZ')} - ${new Date(drill.value.dateTo).toLocaleDateString('cs-CZ')}, dle povolávacího rozkazu Sp. zn. "DOPLŇ ČÍSLO PR"/${new Date(drill.value.dateFrom).getFullYear()} z důvodů rodinných.
+
+${logged.value.lastname} ${logged.value.firstname}`),
+    mailto = computed(() => `mailto:${excuseRecipient}?subject=${encodeURIComponent(excuseSubject.value)}&body=${encodeURIComponent(excuseBody.value)}`)
+
 
 watch(showParkingModal, (show) => {
     if (show) {
