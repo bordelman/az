@@ -145,7 +145,7 @@
         </NModal>
         <NModal v-model:show="showExcuseModal" preset="card" :style="{ maxWidth: '600px', width: '80vw' }">
             <NSpace vertical>
-                <NInput v-model:value="excuseRecipient" disabled />
+                <NInput v-for="excuseRecipient of excuseRecipients" :key="excuseRecipient" :value="excuseRecipient" disabled />
                 <NInput v-model:value="excuseSubject" placeholder="Předmět" />
                 <NInput v-model:value="excuseBody" type="textarea" placeholder="Text omluvného emailu"
                     :autosize="{ minRows: 4 }" />
@@ -239,14 +239,14 @@ const { isLoading } = useLayout(),
     accommodationRequest = ref(!!myNomination.value?.accommodation),
     accommodation = ref(myNomination.value?.accommodation),
     parking: Ref = ref(myNomination.value?.parking),
-    excuseRecipient = 'Helena.Bila@mo.gov.cz',
+    excuseRecipients = ['Helena.Bila@mo.gov.cz', 'Gabriela.Pokladnikova@mo.gov.cz', 'Petr.Stastny@mo.gov.cz'],
     excuseSubject = ref('Žádost o omluvení z vojenského cvičení ' + drill.value.name),
     excuseBody = ref(`Dobrý den,
 
 žádám o omluvení z vojenského cvičení "${drill.value.name}" konaného dne ${new Date(drill.value.dateFrom).toLocaleDateString('cs-CZ')} - ${new Date(drill.value.dateTo).toLocaleDateString('cs-CZ')}, dle povolávacího rozkazu Sp. zn. "DOPLŇ ČÍSLO PR"/${new Date(drill.value.dateFrom).getFullYear()} z důvodů rodinných.
 
 ${logged.value.lastname} ${logged.value.firstname}`),
-    mailto = computed(() => `mailto:${excuseRecipient}?subject=${encodeURIComponent(excuseSubject.value)}&body=${encodeURIComponent(excuseBody.value)}`)
+    mailto = computed(() => `mailto:${excuseRecipients.join(',')}?subject=${encodeURIComponent(excuseSubject.value)}&body=${encodeURIComponent(excuseBody.value)}`)
 
 
 watch(showParkingModal, (show) => {

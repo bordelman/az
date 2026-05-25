@@ -1,6 +1,13 @@
 <template>
 	<div class="p-4 border rounded shadow-sm">
-		<h3 class="mb-4">Import zařazovací listiny</h3>
+		<h3 class="mb-4">
+			<NTooltip>
+				<template #trigger>
+					Import zařazovací listiny
+				</template>
+				{{ Object.keys(HeadersMap).join("; ") }}
+			</NTooltip>
+		</h3>
 
 		<input type="file" accept=".csv" @change="handleFileUpload" :disabled="isProcessing"
 			class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
@@ -9,9 +16,6 @@
 			Zpracovávám soubor...
 		</div>
 
-		<pre>
-			{{ dataOk }}
-		</pre>
 		<div v-if="assignment.length > 0" class="mt-6">
 			<p class="text-green-600 font-bold">Nalezeno {{ assignment.length }} záznamů</p>
 
@@ -31,6 +35,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Papa from 'papaparse';
+import { NTooltip } from 'naive-ui';
 
 
 const HeadersMap: Record<string, string> = {
