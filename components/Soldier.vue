@@ -1,7 +1,8 @@
 <template>
     <div>
-        <div v-if="!soldier" style="padding: 2rem; text-align: center;">
-            <template v-if="personalNumber !== '1'">
+        <div v-if="logged.hideFromSearch">Vítej Admine</div>
+        <div v-else-if="!soldier" style="padding: 2rem; text-align: center;">
+            <template v-if="![1, 2].includes(personalNumber)">
                 Načítám data profilu...
             </template>
         </div>

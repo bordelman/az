@@ -5,7 +5,7 @@
     </NuxtLink>
     <div class="center" v-if="logged">
       <div class="top">
-        <NuxtLink v-if="logged.personalNumber !== 1" to="/">Můj profil</NuxtLink>
+        <NuxtLink v-if="!logged.hideFromSearch" to="/">Můj profil</NuxtLink>
         <NuxtLink to="/soldiers">Přehled vojáků</NuxtLink>
         <NuxtLink v-if="logged.higherPermission" to="/soldiers/new">
           Založit vojáka
@@ -20,10 +20,14 @@
       </div>
       <div class="bottom">
         <div v-if="logged.personalNumber !== 1" class="logged-soldier">
-          {{ logged.rank.abbreviation }}. {{ logged.firstname }}
-          {{ logged.lastname }}, {{ logged.assignment?.position.position }} ({{
-            logged.assignment?.company
-          }}/{{ logged.assignment?.platoon || "_" }}/{{ logged.assignment?.squad || "_" }})
+          <template v-if="logged.rank.id < 16">
+            {{ logged.rank.abbreviation }}.
+          </template>
+          {{ logged.firstname }}
+          {{ logged.lastname }}
+          <template v-if="logged.rank.id < 16">
+            , {{ logged.assignment?.position.position }} ({{ logged.assignment?.company }}/{{ logged.assignment?.platoon || "_" }}/{{ logged.assignment?.squad || "_" }})
+          </template>
         </div>
         <div v-else>
           Admin

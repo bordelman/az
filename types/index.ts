@@ -47,6 +47,7 @@ export interface ISoldier {
   carColor: string;
   carLicensePlate: string;
   securityClearanceDue: Date;
+  hideFromSearch?: boolean;
 }
 
 export interface IAccommodation {

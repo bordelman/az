@@ -239,7 +239,7 @@ const { isLoading } = useLayout(),
     accommodationRequest = ref(!!myNomination.value?.accommodation),
     accommodation = ref(myNomination.value?.accommodation),
     parking: Ref = ref(myNomination.value?.parking),
-    excuseRecipients = ['Helena.Bila@mo.gov.cz', 'Gabriela.Pokladnikova@mo.gov.cz', 'Petr.Stastny@mo.gov.cz'],
+    excuseRecipients = ['Gabriela.Pokladnikova@mo.gov.cz', 'Lenka.Cigankova@mo.gov.cz', 'Petr.Stastny@mo.gov.cz'],
     excuseSubject = ref('Žádost o omluvení z vojenského cvičení ' + drill.value.name),
     excuseBody = ref(`Dobrý den,
 
