@@ -301,13 +301,14 @@ export async function updateDrillNominations(
 export async function updateDrill(
   drill: Record<any, any>,
   nominated: Array<number>,
+  onlyNominations = false
 ): Promise<boolean> {
   loadingStart();
   try {
     const id = drill.id;
     delete drill.id;
     await Promise.all([
-      fetch(`${apiBaseUrl}drills/${id}`, {
+      onlyNominations ? undefined : fetch(`${apiBaseUrl}drills/${id}`, {
         method: "PATCH",
         body: JSON.stringify(drill),
         headers: {

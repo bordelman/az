@@ -6,7 +6,7 @@
 import type {IDrill} from "~/types";
 import type {PropType} from "vue";
 
-const {nominated} = defineProps({
+const {nominated, drill} = defineProps({
   nominated: Array<number>,
   drill: {
     type: Object as PropType<IDrill>

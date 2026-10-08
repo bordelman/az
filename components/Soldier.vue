@@ -1,10 +1,8 @@
 <template>
     <div>
-        <div v-if="logged.hideFromSearch">Vítej Admine</div>
+        <div v-if="['1', '2'].includes(personalNumber)">Vítej Admine</div>
         <div v-else-if="!soldier" style="padding: 2rem; text-align: center;">
-            <template v-if="![1, 2].includes(personalNumber)">
-                Načítám data profilu...
-            </template>
+            Načítám data profilu...
         </div>
         <section class="soldier" v-else-if="soldier.personalNumber">
             <div class="attributes">

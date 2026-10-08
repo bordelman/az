@@ -38,13 +38,13 @@
       Vybrat vojáky{{ nominatedSoldiers.length ? ` (${nominatedSoldiers.length})` : '' }}
     </NButton>
 
-    <NButton :disabled="actionsDisabled" @click="callCreateDrill">Uložit</NButton>
+    <NButton :disabled="actionsDisabled" @click="()=>callCreateDrill()">Uložit</NButton>
     <NModal v-model:show="showSoldierSelector" class="custom-card" preset="card"
       :style="{ maxWidth: '80vw', maxHeight: '80vh' }" title="Nominace" :bordered="false" size="huge">
       <NDataTable striped :columns="columns" :data="soldiers" :row-key="(row: RowData) => row.personalNumber"
         :default-checked-row-keys="nominatedSoldiers" max-height="50vh" @update:checked-row-keys="handleCheck" />
       <template #action>
-        <NButton @click="callCreateDrill">Potvrdit výběr</NButton>
+        <NButton @click="() => callCreateDrill(true)">Potvrdit výběr</NButton>
         <NButton type="error" @click="revertNominations">Zahodit změny</NButton>
       </template>
     </NModal>
@@ -413,12 +413,23 @@ function updateReturnDate() {
     }`;
 }
 
-async function callCreateDrill() {
+async function updateNominations() {
+  const drillId = drillSrc.value.id;
+  try {
+    await updateDrillNominations(drillId, nominatedSoldiers.value);
+    await getDrillNominations(drillId);
+    useRouter().push("/drills/" + drillId);
+  } catch (error) {
+    window.alert(error);
+  }
+}
+
+async function callCreateDrill(onlyNominations = false) {
   let target;
   try {
     if (drillSrc.value.id) {
       target = drillSrc.value.id;
-      await updateDrill(drillSrc.value, nominatedSoldiers.value);
+      await updateDrill(drillSrc.value, nominatedSoldiers.value, onlyNominations);
     } else {
       target = await createDrill(drillSrc.value, nominatedSoldiers.value);
     }
