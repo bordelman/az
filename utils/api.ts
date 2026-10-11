@@ -1,8 +1,8 @@
 import { type INomination, type ISoldier, EAttendance, type IParking, type IDrill, type IAccommodation } from "~/types";
 
 
-const apiBaseUrl = "http://0.0.0.0:8000/az/api/",
-// const apiBaseUrl = "https://pecaj.fun/az/api/",
+// const apiBaseUrl = "http://0.0.0.0:8000/az/api/",
+const apiBaseUrl = "https://pecaj.fun/az/api/",
 
   { loadingEnd, loadingStart } = useLayout();
 
