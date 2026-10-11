@@ -42,20 +42,8 @@
             <NInput type="tel" v-model:value="soldier.mobile" placeholder="Mobil" />
         </div>
         <div>
-            Pozice:
-            <NSelect v-model:value="soldier.position" :options="positionOptions" placeholder="Pozice" />
-        </div>
-        <div>
-            Rota:
-            <NSelect v-model:value="soldier.company" :options="companyOptions" placeholder="Rota" />
-        </div>
-        <div>
-            Četa:
-            <NSelect v-model:value="soldier.platoon" :options="platoonOptions" placeholder="Četa" />
-        </div>
-        <div>
-            Družstvo:
-            <NSelect v-model:value="soldier.squad" :options="squadOptions" placeholder="Družstvo" />
+            Zařazení:
+            <NSelect v-model:value="soldier.assignment" :options="assignmentOptions" placeholder="Zařazení" filterable :consistent-menu-width="false"/>
         </div>
         <NButton @click="callCreateSoldier">Uložit</NButton>
     </section>
@@ -65,20 +53,19 @@
 import { NButton, NDatePicker, NInput, NInputNumber, NSelect } from "naive-ui";
 import type { ISoldier } from "~/types";
 import {
-    companyOptions,
-    platoonOptions,
-    squadOptions,
-    medicalClasificationOptions
+    medicalClasificationOptions,
+    getAssignmentLabel
 } from "~/types"
 
 const soldier: ISoldier = reactive({}),
-    { positions, ranks } = useSettings(),
-    positionOptions = Object.values(positions.value).map((position) => {
+    { assignments, ranks } = useSettings(),
+    assignmentOptions = assignments.value?.map((assignments) => {
         return {
-            label: position.position,
-            value: position.id,
+            label: getAssignmentLabel(assignments),
+            value: assignments.id,
         };
     }),
+
     rankOptions = Object.values(ranks.value).map((rank) => {
         return {
             label: rank.rank,

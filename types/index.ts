@@ -104,3 +104,21 @@ export const
     { label: "B3", value: 4 },
     { label: "C", value: 5 },
   ]
+
+  export function getAssignmentLabel(assignment) {
+    const {position, company, platoon, squad} = assignment;    
+
+    let label = position;
+
+    if (company !== null) {
+        label += ' - '+ companyOptions.find(c => c.value === company)?.label;
+    }
+    if (platoon !== null) {
+        label += '/' + platoonOptions.find(p => p.value === platoon)?.label;
+    }
+    if (squad !== null) {
+        label += '/' + squadOptions.find(s => s.value === squad)?.label;
+    }    
+
+    return label;
+}

@@ -1,8 +1,8 @@
 import { type INomination, type ISoldier, EAttendance, type IParking, type IDrill, type IAccommodation } from "~/types";
 
 
-// const apiBaseUrl = "http://0.0.0.0:8000/az/api/",
-const apiBaseUrl = "https://pecaj.fun/az/api/",
+const apiBaseUrl = "http://0.0.0.0:8000/az/api/",
+// const apiBaseUrl = "https://pecaj.fun/az/api/",
 
   { loadingEnd, loadingStart } = useLayout();
 
@@ -395,6 +395,23 @@ export async function getRanks() {
   }
 }
 
+export async function getAssignments() {
+  loadingStart();
+  try {
+    return await (
+      await fetch(`${apiBaseUrl}enums/assignments`, {
+        headers: {
+          Authorization: getBearerToken(),
+        },
+      })
+    ).json();
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loadingEnd();
+  }
+}
+
 export async function getPositions() {
   loadingStart();
   try {
@@ -500,5 +517,20 @@ export async function uploadSoldiersClearances(clearances:Array<any>) {
     console.log(error);
   } finally {
     loadingEnd();
+  }
+}
+
+export async function gdprApproval() {
+  try {
+    return await (
+      await fetch(`${apiBaseUrl}soldiers/gdpr-approve`, {
+        method: "PATCH",
+        headers: {
+          Authorization: getBearerToken()
+        }
+      })
+    ).json();
+  } catch (error) {
+    console.log(error);
   }
 }

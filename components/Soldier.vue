@@ -55,7 +55,7 @@
                             <NInput v-else v-model:value="soldier.titleAfter" placeholder="Titul za jménem" />
                         </td>
                     </tr>
-                    <tr>
+                    <tr v-if="isMyProfile || logged.higherPermission">
                         <td>
                             Datum narození:
                         </td>
@@ -66,7 +66,7 @@
                                 clearable />
                         </td>
                     </tr>
-                    <tr>
+                    <tr v-if="isMyProfile || logged.higherPermission">
                         <td>
                             Adresa trvalého bydliště:
                         </td>
@@ -145,13 +145,14 @@
                     </tr>
                     <tr>
                         <td>
-                            Pozice:
+                            Zařazení:
                         </td>
                         <td>
-                            <span>{{ soldier.assignment?.position.position }}</span>
+                            <span v-if="!edit">{{ soldier.assignment?.position.position }}</span>
+                            <NSelect v-else v-model:value="soldier.assignment.id" :options="assignmentOptions" filterable/>
                         </td>
                     </tr>
-                    <tr v-if="typeof soldier.assignment?.company === 'number'">
+                    <tr v-if="!edit && typeof soldier.assignment?.company === 'number'">
                         <td>
                             Rota:
                         </td>
@@ -161,7 +162,7 @@
                                 }}</span>
                         </td>
                     </tr>
-                    <tr v-if="typeof soldier.assignment?.platoon === 'number'">
+                    <tr v-if="!edit && typeof soldier.assignment?.platoon === 'number'">
                         <td>
                             Četa:
                         </td>
@@ -171,7 +172,7 @@
                                 }}</span>
                         </td>
                     </tr>
-                    <tr v-if="typeof soldier.assignment?.squad === 'number'">
+                    <tr v-if="!edit && typeof soldier.assignment?.squad === 'number'">
                         <td>
                             Družstvo:
                         </td>
@@ -181,21 +182,21 @@
                                 }}</span>
                         </td>
                     </tr>
-                    <tr>
+                    <tr v-if="isMyProfile || logged.higherPermission">
                         <td>Značka automobilu</td>
                         <td>
                             <span v-if="!edit">{{ soldier.carBrand }}</span>
                             <NInput v-else v-model:value="soldier.carBrand" placeholder="Značka automobilu" />
                         </td>
                     </tr>
-                    <tr>
+                    <tr v-if="isMyProfile || logged.higherPermission">
                         <td>Barva automobilu</td>
                         <td>
                             <span v-if="!edit">{{ soldier.carColor }}</span>
                             <NInput v-else v-model:value="soldier.carColor" placeholder="Barva automobilu" />
                         </td>
                     </tr>
-                    <tr>
+                    <tr v-if="isMyProfile || logged.higherPermission">
                         <td>SPZ automobilu</td>
                         <td>
                             <span v-if="!edit">{{ soldier.carLicensePlate }}</span>
@@ -207,9 +208,11 @@
             <NButton v-if="logged?.personalNumber === soldier.personalNumber" @click="showNewPasswordModal = true">
                 Změnit heslo
             </NButton>
-            <NButton v-if="!edit" @click="edit = true"> Upravit </NButton>
-            <NButton v-else @click="callEditSoldier"> Uložit změny </NButton>
-            <NButton v-if="logged.personalNumber === 1 && !edit" @click="callDeleteSoldier" type="error">Smazat vojáka
+            <template v-if="logged.higherPermission">
+                <NButton v-if="!edit" @click="edit = true">Upravit</NButton>
+                <NButton v-else @click="callEditSoldier">Uložit změny</NButton>
+            </template>
+            <NButton v-if="logged.hideFromSearch && !edit" @click="callDeleteSoldier" type="error">Smazat vojáka
             </NButton>
             <section class="drills">
                 <h2>Moje nominace</h2>
@@ -352,7 +355,7 @@ import {
     NTooltip,
     useDialog,
 } from "naive-ui";
-import { EAttendance, type INomination, type ISoldier } from "~/types";
+import { EAttendance, getAssignmentLabel, type INomination, type ISoldier } from "~/types";
 import { deleteSoldier } from "#imports";
 import {
     companyOptions,
@@ -361,11 +364,18 @@ import {
     medicalClasificationOptions
 } from "~/types"
 
-const logged = useState<ISoldier>("logged"),
+const
+    logged = useState<ISoldier>("logged"),
     edit = ref(false),
     personalNumber = ref<string>(useRoute().params.personalNumber as string || logged.value?.personalNumber.toString()),
-    { ranks } = useSettings(),
+    { assignments, ranks } = useSettings(),
     dialog = useDialog(),
+    assignmentOptions = assignments.value?.map((assignments) => {
+        return {
+            label: getAssignmentLabel(assignments),
+            value: assignments.id,
+        };
+    }),
     rankOptions = Object.values(ranks.value).map((rank) => {
         return {
             label: rank.rank,
@@ -382,7 +392,8 @@ const logged = useState<ISoldier>("logged"),
         old: undefined,
         new: undefined,
         controll: undefined,
-    });
+    }),
+    isMyProfile = computed(() => logged.value.personalNumber === soldier.value?.personalNumber);
 
 async function callEditSoldier() {
     try {
