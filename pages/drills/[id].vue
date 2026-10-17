@@ -87,15 +87,31 @@
                         </NTooltip>
                         <NTooltip v-if="nomination.soldier.personalNumber == myId">
                             <template #trigger>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px"
-                                    @click="editNomination">
-                                    <path
-                                        d="m487.4 315.7-42.6-24.6c4.3-23.2 4.3-47 0-70.2l42.6-24.6c4.9-2.8 7.1-8.6 5.5-14-11.1-35.6-30-67.8-54.7-94.6-3.8-4.1-10-5.1-14.8-2.3l-42.6 24.6c-17.9-15.4-38.5-27.3-60.8-35.1v-49.1c0-5.6-3.9-10.5-9.4-11.7-36.7-8.2-74.3-7.8-109.2 0-5.5 1.2-9.4 6.1-9.4 11.7v49.2c-22.2 7.9-42.8 19.8-60.8 35.1l-42.5-24.6c-4.9-2.8-11-1.9-14.8 2.3-24.7 26.7-43.6 58.9-54.7 94.6-1.7 5.4.6 11.2 5.5 14l42.6 24.6c-4.3 23.2-4.3 47 0 70.2l-42.6 24.6c-4.9 2.8-7.1 8.6-5.5 14 11.1 35.6 30 67.8 54.7 94.6 3.8 4.1 10 5.1 14.8 2.3l42.6-24.6c17.9 15.4 38.5 27.3 60.8 35.1v49.2c0 5.6 3.9 10.5 9.4 11.7 36.7 8.2 74.3 7.8 109.2 0 5.5-1.2 9.4-6.1 9.4-11.7v-49.2c22.2-7.9 42.8-19.8 60.8-35.1l42.6 24.6c4.9 2.8 11 1.9 14.8-2.3 24.7-26.7 43.6-58.9 54.7-94.6 1.5-5.5-.7-11.3-5.6-14.1zm-231.4 20.3c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z" />
-                                </svg>
+                                <NButton text type="success" @click="editNomination">
+                                    <template #icon>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px">
+                                            <path
+                                                fill="currentColor" d="m487.4 315.7-42.6-24.6c4.3-23.2 4.3-47 0-70.2l42.6-24.6c4.9-2.8 7.1-8.6 5.5-14-11.1-35.6-30-67.8-54.7-94.6-3.8-4.1-10-5.1-14.8-2.3l-42.6 24.6c-17.9-15.4-38.5-27.3-60.8-35.1v-49.1c0-5.6-3.9-10.5-9.4-11.7-36.7-8.2-74.3-7.8-109.2 0-5.5 1.2-9.4 6.1-9.4 11.7v49.2c-22.2 7.9-42.8 19.8-60.8 35.1l-42.5-24.6c-4.9-2.8-11-1.9-14.8 2.3-24.7 26.7-43.6 58.9-54.7 94.6-1.7 5.4.6 11.2 5.5 14l42.6 24.6c-4.3 23.2-4.3 47 0 70.2l-42.6 24.6c-4.9 2.8-7.1 8.6-5.5 14 11.1 35.6 30 67.8 54.7 94.6 3.8 4.1 10 5.1 14.8 2.3l42.6-24.6c17.9 15.4 38.5 27.3 60.8 35.1v49.2c0 5.6 3.9 10.5 9.4 11.7 36.7 8.2 74.3 7.8 109.2 0 5.5-1.2 9.4-6.1 9.4-11.7v-49.2c22.2-7.9 42.8-19.8 60.8-35.1l42.6 24.6c4.9 2.8 11 1.9 14.8-2.3 24.7-26.7 43.6-58.9 54.7-94.6 1.5-5.5-.7-11.3-5.6-14.1zm-231.4 20.3c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z" />
+                                        </svg>
+                                    </template>
+                                </NButton>
                             </template>
                             Upravit parkování{{
                                 drill.offerAccommodation ? "/ubytování" : ""
                             }}
+                        </NTooltip>
+                        <NTooltip v-if="logged.hideFromSearch">
+                            <template #trigger>
+                                <NButton text type="error" @click="oboReaction(nomination, EAttendance.Absent)">
+                                    <template #icon>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                                            <path d="M0 0h24v24H0z" fill="none" />
+                                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.56 3.69a9 9 0 0 0-2.92 1.95M3.69 8.56A9 9 0 0 0 3 12m.69 3.44a9 9 0 0 0 1.95 2.92m2.92 1.95A9 9 0 0 0 12 21m3.44-.69a9 9 0 0 0 2.92-1.95m1.95-2.92A9 9 0 0 0 21 12m-.69-3.44a9 9 0 0 0-1.95-2.92m-2.92-1.95A9 9 0 0 0 12 3m-3 9h6" />
+                                        </svg>
+                                    </template>
+                                </NButton>
+                            </template>
+                            Vájak se NEzúčastní
                         </NTooltip>
                     </li>
                 </ul>
@@ -108,6 +124,19 @@
                 <ul v-if="!isLoading" class="soldiers">
                     <li class="soldier" v-for="(nomination, index) of absent" :key="'soldier-' + index">
                         <SoldierLink :soldier="nomination.soldier" />
+                        <NTooltip v-if="logged.hideFromSearch">
+                            <template #trigger>
+                                <NButton text type="success" @click="oboReaction(nomination, EAttendance.Present)">
+                                    <template #icon>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                                            <path d="M0 0h24v24H0z" fill="none" />
+                                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21.8769 10.4357C22.041 11.4721 22.041 12.5279 21.8769 13.5643M20.0902 17.8778C19.4734 18.7268 18.7268 19.4734 17.8778 20.0902M13.5643 21.8769C12.5279 22.041 11.4721 22.041 10.4357 21.8769M6.12215 20.0902C5.2732 19.4734 4.52663 18.7268 3.90983 17.8778M2.12312 13.5643C1.95896 12.5279 1.95896 11.4721 2.12312 10.4357M3.90983 6.12215C4.52663 5.2732 5.2732 4.52663 6.12215 3.90983M10.4357 2.12312C11.4721 1.95896 12.5279 1.95896 13.5643 2.12312M17.8778 3.90983C18.7268 4.52663 19.4734 5.2732 20.0902 6.12215M8 12L10.6667 15L16 9" />
+                                        </svg>
+                                    </template>
+                                </NButton>
+                            </template>
+                            Vájak se zúčastní
+                        </NTooltip>
                     </li>
                 </ul>
             </section>
@@ -119,6 +148,32 @@
                 <ul v-if="!isLoading" class="soldiers">
                     <li class="soldier" v-for="(nomination, index) of notResponded" :key="'soldier-' + index">
                         <SoldierLink :soldier="nomination.soldier" />
+                        <NTooltip v-if="logged.hideFromSearch">
+                            <template #trigger>
+                                <NButton text type="success" @click="oboReaction(nomination, EAttendance.Present)">
+                                    <template #icon>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                                            <path d="M0 0h24v24H0z" fill="none" />
+                                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21.8769 10.4357C22.041 11.4721 22.041 12.5279 21.8769 13.5643M20.0902 17.8778C19.4734 18.7268 18.7268 19.4734 17.8778 20.0902M13.5643 21.8769C12.5279 22.041 11.4721 22.041 10.4357 21.8769M6.12215 20.0902C5.2732 19.4734 4.52663 18.7268 3.90983 17.8778M2.12312 13.5643C1.95896 12.5279 1.95896 11.4721 2.12312 10.4357M3.90983 6.12215C4.52663 5.2732 5.2732 4.52663 6.12215 3.90983M10.4357 2.12312C11.4721 1.95896 12.5279 1.95896 13.5643 2.12312M17.8778 3.90983C18.7268 4.52663 19.4734 5.2732 20.0902 6.12215M8 12L10.6667 15L16 9" />
+                                        </svg>
+                                    </template>
+                                </NButton>
+                            </template>
+                            Vájak se zúčastní
+                        </NTooltip>
+                        <NTooltip v-if="logged.hideFromSearch">
+                            <template #trigger>
+                                <NButton text type="error" @click="oboReaction(nomination, EAttendance.Absent)">
+                                    <template #icon>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                                            <path d="M0 0h24v24H0z" fill="none" />
+                                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.56 3.69a9 9 0 0 0-2.92 1.95M3.69 8.56A9 9 0 0 0 3 12m.69 3.44a9 9 0 0 0 1.95 2.92m2.92 1.95A9 9 0 0 0 12 21m3.44-.69a9 9 0 0 0 2.92-1.95m1.95-2.92A9 9 0 0 0 21 12m-.69-3.44a9 9 0 0 0-1.95-2.92m-2.92-1.95A9 9 0 0 0 12 3m-3 9h6" />
+                                        </svg>
+                                    </template>
+                                </NButton>
+                            </template>
+                            Vájak se NEzúčastní
+                        </NTooltip>
                     </li>
                 </ul>
             </section>
@@ -165,8 +220,8 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NCard, NCheckbox, NDatePicker, NInput, NModal, NSpace, NTooltip } from "naive-ui";
-import { EAttendance, type IParking, type ISoldier } from "~/types";
+import { NButton, NCard, NCheckbox, NDatePicker, NInput, NModal, NSpace, NTooltip, useDialog } from "naive-ui";
+import { EAttendance, type INomination, type IParking, type ISoldier } from "~/types";
 
 const { isLoading } = useLayout(),
     logged = useState<ISoldier>("logged"),
@@ -234,6 +289,7 @@ const { isLoading } = useLayout(),
             (nomination) => nomination.soldier.personalNumber === myId,
         ),
     ),
+    dialog = useDialog(),
     alreadyIn = computed(() =>
         present.value.some(
             (nomination) => nomination.soldier.personalNumber === myId,
@@ -324,6 +380,22 @@ async function removeMe() {
     accommodationRequest.value = false;
     parkingRequest.value = false;
     nominations.value = await reactToNomination(id, EAttendance.Absent);
+}
+
+async function oboReaction(nomination: INomination, reaction: EAttendance) {
+    const
+        {personalNumber} = nomination.soldier,
+        action = reaction === EAttendance.Absent ? "Nezúčastní se" : "Zúčastní se";
+
+    dialog.warning({
+        title: `${nomination?.soldier.firstname} ${nomination?.soldier.lastname}`,
+        content: `Dojde k změně stavu na "${action}"`,
+        onPositiveClick: async () => {
+            console.log(reaction);
+            nominations.value = await oboReactToNomination(id, personalNumber, reaction);
+        },
+        positiveText: "Přesunout"
+    })
 }
 
 function exportCsv(parameter: "complet" | "parking" | "accommodation") {
@@ -421,32 +493,6 @@ function exportCsv(parameter: "complet" | "parking" | "accommodation") {
 
         .attendents {
             color: green;
-
-            .soldier {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-
-                svg {
-                    cursor: pointer;
-
-                    path {
-                        fill: currentColor;
-                    }
-                }
-
-                .badge {
-                    cursor: pointer;
-                    display: flex;
-                    aspect-ratio: 1;
-                    border-radius: 100%;
-                    border: 1px solid currentColor;
-                    height: 18px;
-                    width: 18px;
-                    justify-content: center;
-                    align-items: center;
-                }
-            }
         }
 
         .skipped {
@@ -459,6 +505,24 @@ function exportCsv(parameter: "complet" | "parking" | "accommodation") {
 
         a {
             color: inherit;
+        }
+
+        .soldier {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            .badge {
+                cursor: pointer;
+                display: flex;
+                aspect-ratio: 1;
+                border-radius: 100%;
+                border: 1px solid currentColor;
+                height: 18px;
+                width: 18px;
+                justify-content: center;
+                align-items: center;
+            }
         }
     }
 }

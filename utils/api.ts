@@ -385,6 +385,29 @@ export async function reactToNomination(
   }
 }
 
+export async function oboReactToNomination(drillId: string, personalNumber: number, attendance: EAttendance) {
+  loadingStart();
+  try {
+    return await (
+      await fetch(`${apiBaseUrl}drills/${drillId}/nomination/obo`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          attendance,
+          personalNumber
+        }),
+        headers: {
+          Authorization: getBearerToken(),
+          "Content-Type": "application/json",
+        },
+      })
+    ).json();
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loadingEnd();
+  }
+}
+
 // ENUMS
 export async function getRanks() {
   loadingStart();
