@@ -20,6 +20,8 @@ export interface INomination {
   parking: IParking;
   soldier: ISoldier;
   status: EAttendance;
+  nominationNotificationSent: boolean;
+  updateNotificationSent: boolean;
 }
 export interface ISoldier {
   assignment?: {

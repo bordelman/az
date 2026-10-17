@@ -16,6 +16,10 @@
                 <NButton type="error" @click="callRemoveDrill">
                     Zrušit cvičení
                 </NButton>
+                <NButton v-if="logged.hideFromSearch" @click="resendNotification">
+                    Znovu odeslat notifikace
+                    {{ unsentNominationNotificationsCount }}/{{ unsentUpdateNotificationsCount }}
+                </NButton>
             </div>
         </div>
         <NCard v-if="drill.additionalInfo" title="Dodatečné informace">
@@ -235,6 +239,8 @@ const { isLoading } = useLayout(),
             (nomination) => nomination.soldier.personalNumber === myId,
         ),
     ),
+    unsentNominationNotificationsCount = computed(() => nominations.value.filter(nomination => !nomination.nominationNotificationSent).length),
+    unsentUpdateNotificationsCount = computed(() => nominations.value.filter(nomination => !nomination.updateNotificationSent).length),
     parkingRequest = ref(!!myNomination.value?.parking),
     accommodationRequest = ref(!!myNomination.value?.accommodation),
     accommodation = ref(myNomination.value?.accommodation),
@@ -289,6 +295,9 @@ function toggleSquadFilter() {
     showSquad.value = !showSquad.value;
 }
 
+function resendNotification() {
+    resendNominationNotifications(drill.value.id);
+}
 async function callRemoveDrill() {
     await removeDrill(drill.value.id);
 
