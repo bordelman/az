@@ -329,7 +329,11 @@ export async function updateDrill(
 }
 
 export async function resendNominationNotifications(drillId: number) {
-  await fetch(`${apiBaseUrl}drills/${drillId}/sendNotifications`)
+  await fetch(`${apiBaseUrl}drills/${drillId}/sendNotifications`, {
+    headers: {
+      Authorization: getBearerToken(),
+    },
+  })
 }
 
 export async function removeDrill(id: number) {
